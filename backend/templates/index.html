@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        {% for item in Items %}
+        <table border="1">
+            <tr>
+                <td colspan="3">商品名:{{ item.name }}</td>
+            </tr>
+            <tr>
+                <td>価格：{{item.price}}</td>
+            </tr>
+            <tr>
+                <td><img src="../static/images/{{ item.image }}"></td>
+            </tr>
+        </table>
+        
+        {% endfor %}
+</body>
+</html>
