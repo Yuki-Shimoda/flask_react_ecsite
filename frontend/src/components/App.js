@@ -14,6 +14,7 @@ function App() {
       <BrowserRouter>
         <Header />
         <Switch> 
+          <Route path='/item_detail/:Id' exact component={ItemDetail}></Route>
           <Route path='/item_detail' component={ItemDetail}></Route>
           <Route path='/cart' component={Cart}></Route>
           <Route path='/order_history' component={OrderHistory}></Route>
