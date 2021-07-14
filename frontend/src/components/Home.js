@@ -1,8 +1,59 @@
-import React from 'react';
+import React,{useState, useEffect} from 'react';
+import {BrowserRouter as Router,useHistory,} from 'react-router-dom';
+import Axios from 'axios';
+// import ItemDetail from './ItemDetail';
 
 const Home = () => {
+    const history = useHistory();
+    const handleLink = path => history.push(path);
+
+    const [itemList, setItems] = useState([])
+
+    useEffect(()=>{
+        console.log('useEffect発動')
+        Axios.get('http://127.0.0.1:5000/')
+        .then(function(res){
+            const firstDbData = res.data
+            console.log(firstDbData)
+            const ItemArray = firstDbData
+            setItems(ItemArray)
+        })
+    },[])
+
+    // console.log(itemList)
+
+    //idのリストを作成
+    const id_list=[]
+    for (const id in itemList){
+        id_list.push(Number(id))
+    }
+    console.log(id_list)
+
     return (
-        <div>Home</div>
+        <>
+            <Router>
+                <div>Home</div>
+                    <ul>
+                    {id_list.map((id,key)=>{
+                            return(
+                                <li key={key}>
+                                    <p>商品ID:{id}</p>
+                                    <p>商品名：{itemList[id].name}</p>
+                                    <p>価格：{itemList[id].price}円</p>
+                                    {/* <p>画像パス：{itemList[id].image}</p> */}
+                                    <img src={`${process.env.PUBLIC_URL}/static/images/${itemList[id].image}`} width="20%"></img>
+                                    {/* <img src={`${process.env.PUBLIC_URL}/logo192.png`}></img> */}
+                                    <button onClick={()=>handleLink(`/item_detail/${id}`)}>商品詳細</button>
+                                </li>
+                            )
+                        })}
+                    </ul>
+                    {/* <Switch>
+                        <Route path="/item_detail/:Id" component={ItemDetail} />
+                    </Switch>  */}
+            </Router> 
+        </>
+
     )
 }
 
