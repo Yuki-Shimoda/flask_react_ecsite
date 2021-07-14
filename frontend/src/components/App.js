@@ -1,7 +1,7 @@
 import React from 'react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom'
 import Header from './Header'
-// import Router from '../Router'
+import Footer from './Footer'
 import Home from './Home'
 import ItemDetail from './ItemDetail.js'
 import Cart from './Cart'
@@ -21,6 +21,7 @@ function App() {
           <Route path='/' component={Home}></Route>
         </Switch>
       </BrowserRouter>
+        <Footer />
     </React.Fragment>
   );
 }

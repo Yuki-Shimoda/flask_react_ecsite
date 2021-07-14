@@ -35,13 +35,14 @@ const Header = () => {
             <Typography variant="h6" className={classes.title}>
             🦀
             </Typography>
-            <Button color="inherit">Login</Button>
             <Button color="inherit" onClick={() => handleLink('/')}>Home</Button>
             <Button color="inherit" onClick={() => handleLink('/cart')}>カート</Button>
-            <Button color="inherit" onClick={() => handleLink('/item_detail')}>商品詳細</Button>
+            {/* <Button color="inherit" onClick={() => handleLink('/item_detail')}>商品詳細</Button> */}
             <Button color="inherit" onClick={() => handleLink('/order_history')}>履歴</Button>
-            <Button color="inherit" onClick={() => handleLink('/complete')}>完了画面</Button>
-        </Toolbar>
+            {/* <Button color="inherit" onClick={() => handleLink('/complete')}>完了画面</Button> */}
+            <Button color="inherit">ログイン</Button>
+            <Button color="inherit">ログアウト</Button>
+        </Toolbar>  
         </AppBar>
         <Button color="primary" onClick={()=>handleLink('/')}>トップへ戻る</Button>   
     </div>

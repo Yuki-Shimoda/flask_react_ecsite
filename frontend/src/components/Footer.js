@@ -20,11 +20,11 @@ const useStyles = makeStyles({
 const Footer = () => {
   const classes = useStyles();
   return (
-    <AppBar position="fixed" color="primary" className={classes.appBar}>
-        <Toolbar>
-            <div className={classes.footer}>Copyright &copy; YourName</div>
-        </Toolbar>
-    </AppBar>    
+<AppBar position="fixed" color="primary" className={classes.appBar}>
+<Toolbar>
+  <div className={classes.footer}>Copyright &copy; YourName</div>
+  </Toolbar>
+</AppBar>   
   )
 };
 
