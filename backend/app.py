@@ -6,7 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import *
 from flask_cors import CORS
 import psycopg2
-
+from sqlalchemy.orm import relationship
+from sqlalchemy.orm.query import Query
+from sqlalchemy.sql.schema import ForeignKey
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -38,11 +40,12 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
-    destinationName = db.Column(db.String, nullable=True)
-    destinationEmail = db.Column(db.String, nullable=True)
-    destinationZipcode = db.Column(db.String, nullable=True)
-    destinationAddress = db.Column(db.String, nullable=True)
-    destinationTel = db.Column(db.String, nullable=True)
+    destination_name = db.Column(db.String, nullable=True)
+    destination_email = db.Column(db.String, nullable=True)
+    destination_zipcode = db.Column(db.String, nullable=True)
+    destination_address = db.Column(db.String, nullable=True)
+    destination_tel = db.Column(db.String, nullable=True)
+    # orderItems = relationship('OrderItems',backref='orders')
 
     # totalPrice = db.Column(db.Integer, nullable=True)
     # orderDate = db.Column(db.Integer, nullable=True)
@@ -57,8 +60,9 @@ class Carts(db.Model):
 
 class OrderItems(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, nullable=False)
+    order_id = db.Column(db.Integer, nullable=False) #db.ForeignKey('orders.id')
     cart_id = db.Column(db.Integer, nullable=False)
+    # order= relationship('Order')
 
 db.create_all()
 
@@ -136,13 +140,15 @@ def detail(Id):
         data = request.get_json()
         item_id = Id
         user_id= 1
+        user_id= 3
+        # item_id = data['post_item']
         quantity= data['post_quantity']
         new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
         db.session.add(new_orderItem)
         db.session.commit()
         print('DBにCart追加完了')
 
-        user = 1
+        user = 3
         u_id = db.session.query(Order).filter(Order.user_id == str(user), Order.status ==0).all()
         if u_id:
             print('重複したuser_idにてstatus:0のレコードを発見')
@@ -180,6 +186,8 @@ def ordered():
             return jsonify(l)
 
     user = 1
+    user = 3
+    print(request.get_json())
     data = request.get_json()
     destinationName = data['post_orderInfo']['destinationName']
     # destinationEmail = data['post_orderInfo']['destinationEmail']
@@ -200,10 +208,10 @@ def ordered():
 
     order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
     order_record = order_record[0]
-    order_record.destinationName = destinationName
-    order_record.destinationZipcode = (destinationZipcode)
-    order_record.destinationAddress = destinationAddress
-    order_record.destinationTel = (destinationTel)
+    order_record.destination_name = destinationName
+    order_record.destination_zipcode = destinationZipcode
+    order_record.destination_address = destinationAddress
+    order_record.destination_tel = destinationTel
     order_record.status = 1
     db.session.commit()
     print('order情報追加・Orderのstatus変更完了')
@@ -213,9 +221,7 @@ def ordered():
         cart_records.status = 1
         db.session.commit()
         print('cartのstatus変更完了')
-
     return redirect('/')
-
 
 @app.route('/delete_cartitem/<int:deleteId>', methods=['POST'])
 def deleteCartItem(deleteId):
@@ -223,6 +229,73 @@ def deleteCartItem(deleteId):
     status_update.status = 9
     db.session.commit()
     return redirect('/')
+
+@app.route("/order_history",methods=['GET'])
+def history_test():
+    user = 3
+    if request.method=='GET':
+        # item_record = db.session.query(Cart.id,Cart.quantity,Cart.item_id,Item.name,Item.image,Cart.user_id).filter(Cart.user_id=='1').join(Item,Item.id==Cart.item_id).all()
+        # print(item_record)
+        #ordersテーブルのidをuser_idとstatus:0でソート
+        orderIds_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 1).all()
+        print(orderIds_tup) # [(1,)(2,)]
+        # ordersのidをリスト・タプル型からリスト型に
+        orderIds =[]
+        for orderId in orderIds_tup:
+            orderIds.append(orderId[0])
+        print(orderIds) # [1,2]
+        
+        # order_history= db.session.query(Item.name,Item.image,Cart.quantity).filter(Cart.user_id ==str(user), Cart.status==1).join(Cart,Cart.item_id==Item.id).all()
+        # print(order_history)
+
+        # order_history2= db.session.query(Item.name,Cart.quantity,OrderItems.order_id,Order.destination_name)\
+        #     .filter(Cart.user_id ==str(user), Cart.status==1)\
+        #     .join((Cart,Cart.item_id==Item.id),(OrderItems,Cart.id==OrderItems.cart_id),(Order,Order.id==OrderItems.order_id)).all()
+        # print(order_history2)
+
+        # order_history3= db.session.query(OrderItems.order_id,Cart.item_id,Cart.quantity,Order.destination_name)\
+        #     .filter(Cart.user_id ==str(user), Cart.status==1)\
+        #     .join((OrderItems,Cart.id==OrderItems.cart_id),(Order,Order.id==OrderItems.order_id)).all()
+        # print(order_history3)
+
+        resdata={}
+        item_id_list=[]
+        quantity_list=[]
+        order_id_list=[]
+        destination_name_list=[]
+        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name)\
+            .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
+            .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
+            .all()
+        print(order_lists)
+        for order_list in order_lists:
+            item_id_list.append(order_list[0])
+            quantity_list.append(order_list[1])
+            order_id_list.append(order_list[2])
+            destination_name_list.append(order_list[3])
+        print(item_id_list)
+        print(quantity_list)
+        print('↓order_id_list')
+        print(order_id_list)
+        print(destination_name_list)
+
+        id_id=0
+        for order_id in order_id_list:
+            if resdata.get(order_id) is None:
+                resdata[order_id]={}
+                resdata[order_id]['destination_name']= destination_name_list[id_id]
+                resdata[order_id]['item_list']= []
+                resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
+                id_id+=1
+            else:
+                #既にresdata[order_id]が存在している場合（1注文で複数種類の商品を購入した場合）
+                resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
+                id_id+=1
+
+        print(resdata)
+        print('orderHistory')
+        redirect('/')
+    return jsonify(resdata)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,6 @@ const Cart = () => {
     const [flag, setFlag] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
     const [updateId, setUpdateId] = useState(0);
-    // const [itemnCount, setItemCount] = useState(0);
 
     const createTotalPrice = () => {
         let total = 0;
@@ -87,7 +86,6 @@ const Cart = () => {
                                                 <TableCell align="right">{item.item.name}</TableCell>
                                                 <TableCell align="right">
                                                     <select name="itemCount"
-                                                        // onChange={() => changeQuantity(item.id)}
                                                     >
                                                         <option value={item.quantity} name={item.quantity}>{item.quantity}</option>
                                                         <option value="1" name="1">1</option>
