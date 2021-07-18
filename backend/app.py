@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -26,9 +26,9 @@ class Order(db.Model):
     payment_id = db.Column(db.Integer, nullable=True)
     destinationName = db.Column(db.String, nullable=True)
     destinationEmail = db.Column(db.String, nullable=True)
-    destinationZipcode = db.Column(db.Integer, nullable=True)
+    destinationZipcode = db.Column(db.String, nullable=True)
     destinationAddress = db.Column(db.String, nullable=True)
-    destinationTel = db.Column(db.Integer, nullable=True)
+    destinationTel = db.Column(db.String, nullable=True)
 
     # totalPrice = db.Column(db.Integer, nullable=True)
     # orderDate = db.Column(db.Integer, nullable=True)
@@ -166,7 +166,7 @@ def ordered():
     order_record.destinationName = destinationName
     order_record.destinationZipcode = destinationZipcode
     order_record.destinationAddress = destinationAddress
-    order_record.destinationTel = int(destinationTel)
+    order_record.destinationTel = destinationTel
     order_record.status = 1
     db.session.commit()
     print('order情報追加・Orderのstatus変更完了')

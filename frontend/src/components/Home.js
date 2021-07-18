@@ -40,7 +40,7 @@ const Home = () => {
                                     <p>商品ID:{id}</p>
                                     <p>商品名：{itemList[id].name}</p>
                                     <p>価格：{itemList[id].price}円</p>
-                                    {/* <p>画像パス：{itemList[id].image}</p> */}
+                                    <p>画像パス：{itemList[id].image}</p>
                                     <img src={`${process.env.PUBLIC_URL}/static/images/${itemList[id].image}`} width="20%"></img>
                                     {/* <img src={`${process.env.PUBLIC_URL}/logo192.png`}></img> */}
                                     <button onClick={()=>handleLink(`/item_detail/${id}`)}>商品詳細</button>
