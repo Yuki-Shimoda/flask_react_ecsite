@@ -7,6 +7,8 @@ import ItemDetail from './ItemDetail.js'
 import Cart from './Cart'
 import Complete from './Complete'
 import OrderHistory from './OrderHistory';
+import Login from './Login';
+import Signup from './Signup';
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
           <Route path='/cart' component={Cart}></Route>
           <Route path='/order_history' component={OrderHistory}></Route>
           <Route path='/complete' component={Complete}></Route>
+          <Route path='/login' component={Login}></Route>
+          <Route path='/signup' component={Signup}></Route>
           <Route path='/' component={Home}></Route>
         </Switch>
       </BrowserRouter>
