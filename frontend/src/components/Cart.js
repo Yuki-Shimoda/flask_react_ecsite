@@ -6,6 +6,7 @@ const Cart = () => {
     const history = useHistory()
     const handleLink = path => history.push(path)
     const [orderInfo,setOrder]=useState('')
+    // const [orderedDate, setOrderedDate]=useState('')
     const [destinationName,setDesitinationName]=useState('')
     const [destinationZipcode,setDesitinationZipcode]=useState('')
     const [destinationAddress,setDesitinationAddress]=useState('')

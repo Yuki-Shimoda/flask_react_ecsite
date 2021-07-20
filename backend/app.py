@@ -1,15 +1,14 @@
 
 from flask import Flask, render_template, request, redirect,jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm.query import Query
+from datetime import datetime, date
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from flask_cors import CORS
-from sqlalchemy.sql.schema import ForeignKey
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -22,7 +21,7 @@ class Item(db.Model):
 class Order(db.Model):
     __tablename__ ='orders'
     id = db.Column(db.Integer, primary_key=True)
-    ordered_date = db.Column(db.Integer, nullable=True)
+    ordered_date = db.Column(db.String, nullable=True)
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
@@ -35,8 +34,6 @@ class Order(db.Model):
 
     # totalPrice = db.Column(db.Integer, nullable=True)
     # orderDate = db.Column(db.Integer, nullable=True)
-
-
 
 class Cart(db.Model):
     # __tablename__ ='Cart'
@@ -52,7 +49,14 @@ class OrderItems(db.Model):
     cart_id = db.Column(db.Integer, nullable=False)
     # order= relationship('Order')
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.String, nullable=False)
+    user_password = db.Column(db.String, nullable=False)
+
 db.create_all()
+
 
 @app.route('/', methods=['GET'])
 def home():
@@ -86,6 +90,8 @@ def home():
                 dic_item[id]['image']=image_list[id_id]
                 id_id+=1
     # print(dic_item)
+    # dt_now=datetime.now()
+    # print('現在時間',dt_now)
     return jsonify(dic_item)
     # showItems()
 
@@ -101,7 +107,7 @@ def detail(Id):
         print(request.get_json())
         data = request.get_json()
         item_id = Id
-        user_id= 3
+        user_id= 1
         # item_id = data['post_item']
         quantity= data['post_quantity']
         print(quantity)
@@ -110,7 +116,7 @@ def detail(Id):
         db.session.commit()
         print('DBにCart追加完了')
 
-        user = 3
+        user = 1
         u_id = db.session.query(Order).filter(Order.user_id == str(user), Order.status ==0).all()
         if u_id:
             print(u_id)
@@ -139,7 +145,7 @@ def detail(Id):
 
 @app.route('/cart', methods=['POST'])
 def ordered():
-    user = 3
+    user = 1
     print(request.get_json())
     data = request.get_json()
     print(data['post_orderInfo']['info'])
@@ -167,6 +173,7 @@ def ordered():
 
     order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
     order_record = order_record[0]
+    # order_record.ordered_date = ordered_record
     order_record.destination_name = destinationName
     order_record.destination_zipcode = destinationZipcode
     order_record.destination_address = destinationAddress
@@ -186,28 +193,13 @@ def ordered():
 
 @app.route("/order_history",methods=['GET'])
 def history_test():
-    user = 3
+    user = 1
     if request.method=='GET':
         # item_record = db.session.query(Cart.id,Cart.quantity,Cart.item_id,Item.name,Item.image,Cart.user_id).filter(Cart.user_id=='1').join(Item,Item.id==Cart.item_id).all()
         # print(item_record)
 
-        #ordersテーブルのidをuser_idとstatus:0でソート
-        orderIds_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 1).all()
-        print(orderIds_tup) # [(1,)(2,)]
-        # ordersのidをリスト・タプル型からリスト型に
-        orderIds =[]
-        for orderId in orderIds_tup:
-            orderIds.append(orderId[0])
-        print(orderIds) # [1,2]
         
-        # order_history= db.session.query(Item.name,Item.image,Cart.quantity).filter(Cart.user_id ==str(user), Cart.status==1).join(Cart,Cart.item_id==Item.id).all()
-        # print(order_history)
-
-        # order_history2= db.session.query(Item.name,Cart.quantity,OrderItems.order_id,Order.destination_name)\
-        #     .filter(Cart.user_id ==str(user), Cart.status==1)\
-        #     .join((Cart,Cart.item_id==Item.id),(OrderItems,Cart.id==OrderItems.cart_id),(Order,Order.id==OrderItems.order_id)).all()
-        # print(order_history2)
-
+        
         # order_history3= db.session.query(OrderItems.order_id,Cart.item_id,Cart.quantity,Order.destination_name)\
         #     .filter(Cart.user_id ==str(user), Cart.status==1)\
         #     .join((OrderItems,Cart.id==OrderItems.cart_id),(Order,Order.id==OrderItems.order_id)).all()
@@ -218,21 +210,22 @@ def history_test():
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
+        #user_idとstatus:0でソート
         order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name)\
             .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
             .all()
-        print(order_lists)
+        # print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
-        print(item_id_list)
-        print(quantity_list)
-        print('↓order_id_list')
-        print(order_id_list)
-        print(destination_name_list)
+        # print(item_id_list)
+        # print(quantity_list)
+        # print('↓order_id_list')
+        # print(order_id_list)
+        # print(destination_name_list)
 
         id_id=0
         for order_id in order_id_list:
@@ -252,6 +245,23 @@ def history_test():
         redirect('/')
     return jsonify(resdata)
 
+@app.route('/signup',methods=['POST'])
+def signup():
+    if request.method=='POST':
+        print(request.get_json()) # {userInfo:{post_name:name,post_id:id,post_password:password}}
+        data=request.get_json()
+        input_name = data['userInfo']['post_name']
+        input_id = data['userInfo']['post_id']
+        input_password = generate_password_hash(data['userInfo']['post_password'])
+        new_user = User(user_name=input_name, user_id=input_id, user_password=input_password)
+        db.session.add(new_user)
+        db.session.commit()
+
+    return data
+
+@app.route('/login',methods=['POST'])
+def login():
+    return 'aiu'
 if __name__ == "__main__":
     app.debug = True
     app.run(host='127.0.0.1', port=5000)

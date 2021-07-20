@@ -48,6 +48,7 @@ const Home = () => {
                             )
                         })}
                     </ul>
+
                     {/* <Switch>
                         <Route path="/item_detail/:Id" component={ItemDetail} />
                     </Switch>  */}

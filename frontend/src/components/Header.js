@@ -22,6 +22,8 @@ const Header = () =>{
             <button onClick={() => toOrderHistory()}>注文履歴</button>
             {/* <button onClick={() => handleLink('/order_history')}>履歴</button> */}
             <button onClick={() => handleLink('/complete')}>完了画面</button>
+            <button onClick={()=>handleLink('/login')}>ログイン</button>
+            <button onClick={()=>handleLink('/signup')}>新規登録</button>
             <button onClick={()=>handleLink('/')}>トップへ戻る</button>
             </Router>
         </React.Fragment>
