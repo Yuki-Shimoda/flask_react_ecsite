@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Form from './Form';
-import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,8 +9,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { Button } from '@material-ui/core';
-
-
 
 const Cart = () => {
     const [cart, setCart] = useState([]);
@@ -84,21 +81,7 @@ const Cart = () => {
                                                     <img src={`${process.env.PUBLIC_URL}/static/images/${item.item.image}`} width="5%"></img>
                                                 </TableCell>
                                                 <TableCell align="right">{item.item.name}</TableCell>
-                                                <TableCell align="right">
-                                                    <select name="itemCount"
-                                                    >
-                                                        <option value={item.quantity} name={item.quantity}>{item.quantity}</option>
-                                                        <option value="1" name="1">1</option>
-                                                        <option value="2" name="2">2</option>
-                                                        <option value="3" name="3">3</option>
-                                                        <option value="4" name="4">4</option>
-                                                        <option value="5" name="5">5</option>
-                                                        <option value="6" name="6">6</option>
-                                                        <option value="7" name="7">7</option>
-                                                        <option value="8" name="8">8</option>
-                                                        <option value="9" name="9">9</option>
-                                                    </select>
-                                                </TableCell>
+                                                <TableCell align="right">{item.quantity}</TableCell>
                                                 <TableCell align="right">{item.item.price}</TableCell>
                                                 <TableCell>
                                                     {

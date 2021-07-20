@@ -66,44 +66,6 @@ class OrderItems(db.Model):
 
 db.create_all()
 
-# mycode
-class CartList(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    ordered = db.Column(db.Integer, server_default="0")
-    quantity = db.Column(db.Integer)
-    item_id = db.Column(db.Integer)
-    user_id = db.Column(db.Integer)
-    
-    def toDict(self):
-        return{
-            'id': self.id,
-            'ordered': self.ordered,
-            'quantity': self.quantity,
-            'item_id' : self.item_id,
-            'user_id' : self.user_id
-        }
-
-class ItemTest(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(50))
-    price = db.Column(db.Integer)
-    category = db.Column(db.String(50))
-    slug = db.Column(db.String(50))
-    description = db.Column(db.String(200))
-    image = db.Column(db.String(50))
-
-    def toDict(self):
-        return{
-            'id': self.id,
-            'title': self.title,
-            'price': self.price,
-            'category': self.category,
-            'slug': self.slug,
-            'description': self.description,
-            'image': self.image
-        }
-
-db.create_all()
 
 @app.route('/', methods=['GET'])
 def home():
@@ -143,9 +105,16 @@ def detail(Id):
         user_id= 3
         # item_id = data['post_item']
         quantity= data['post_quantity']
-        new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
-        db.session.add(new_orderItem)
-        db.session.commit()
+        # new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
+        carts = db.session.query(Carts).all()
+        for cart in carts:
+            if cart.status == 0 and cart.item_id != item_id:
+                new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
+                db.session.add(new_orderItem)
+                db.session.commit()
+
+        # db.session.add(new_orderItem)
+        # db.session.commit()
         print('DBにCart追加完了')
 
         user = 3
@@ -267,17 +236,17 @@ def history_test():
             .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
             .all()
-        print(order_lists)
+        # print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
-        print(item_id_list)
-        print(quantity_list)
-        print('↓order_id_list')
-        print(order_id_list)
-        print(destination_name_list)
+        # print(item_id_list)
+        # print(quantity_list)
+        # print('↓order_id_list')
+        # print(order_id_list)
+        # print(destination_name_list)
 
         id_id=0
         for order_id in order_id_list:
