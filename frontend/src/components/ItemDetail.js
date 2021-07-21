@@ -1,5 +1,5 @@
-import React,{useEffect, useState} from 'react';
-import {useParams,useHistory,Redirect } from 'react-router-dom';
+import React,{useState} from 'react';
+import {useParams,useHistory} from 'react-router-dom';
 import Axios from 'axios';
 
 const ItemDetail = () => {
@@ -18,16 +18,7 @@ const ItemDetail = () => {
     const createCount = e =>{
         const newCount = e.target.value
         setCount(newCount)
-        // setCount(()=>{return newCount})
-        // console.log(itemCount)
     }
-    useEffect(()=>{
-        console.log(itemCount)
-    },[itemCount])
-
-    useEffect(()=>{
-       console.log(detailId) 
-    },[])
     return (
         <>
         <div>ItemDetail：{detailId}</div>

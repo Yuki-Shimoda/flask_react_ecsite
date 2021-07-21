@@ -15,6 +15,7 @@ from flask_bootstrap import Bootstrap
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SECRET_KEY'] = 'secret_key'
 db = SQLAlchemy(app)
@@ -148,7 +149,8 @@ admin.add_view(MyModelView(Order, db.session))
 admin.add_view(MyModelView(Cart, db.session))
 admin.add_view(MyModelView(OrderItems, db.session))
 
-db.create_all()
+# db.create_all()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
