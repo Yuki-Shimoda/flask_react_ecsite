@@ -1,6 +1,13 @@
 # Adminページインデックス（各テーブル管理）
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
+
+# アプリケーションコンテキストにdbが使うグローバル変数を設定
+app = Flask(__name__)
+db.init_app(app)
+with app.app_context():
+    db.create_all()
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,17 +34,22 @@ class Item(db.Model):
 # db.session.commit()
 
 class Order(db.Model):
-    __tablename__ ='orders'
+    __tablename__ ='Orders'
     id = db.Column(db.Integer, primary_key=True)
     ordered_date = db.Column(db.Integer, nullable=True)
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
-    destinationName = db.Column(db.String, nullable=True)
-    destinationEmail = db.Column(db.String, nullable=True)
-    destinationZipcode = db.Column(db.String, nullable=True)
-    destinationAddress = db.Column(db.String, nullable=True)
-    destinationTel = db.Column(db.String, nullable=True)
+    destination_name = db.Column(db.String, nullable=True)
+    destination_email = db.Column(db.String, nullable=True)
+    destination_zipcode = db.Column(db.String, nullable=True)
+    destination_address = db.Column(db.String, nullable=True)
+    destination_tel = db.Column(db.String, nullable=True)
+# Test7 = Order(status=0, user_id=3)
+# db.session.add(Test7)
+# db.session.commit()
+
+
 
 class Cart(db.Model):
     # __tablename__ ='Cart'
@@ -49,8 +61,9 @@ class Cart(db.Model):
 
 class OrderItems(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, nullable=False)
+    order_id = db.Column(db.Integer, nullable=False) 
     cart_id = db.Column(db.Integer, nullable=False)
-
+    
 # db.create_all()
+
 

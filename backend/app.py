@@ -10,9 +10,9 @@ from sqlalchemy.orm.query import Query
 from sqlalchemy.sql.schema import ForeignKey
 
 app = Flask(__name__, static_folder='.', static_url_path='')
+CORS(app)
 
-CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:kaorunagisa14@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
@@ -23,10 +23,16 @@ def get_connection():
     port = '5432'
     users = 'postgres'
     dbnames = 'fr_ec'
-    passwords = 'kaorunagisa14'
+    passwords = 'postgres'
     return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
 
-class ItemTable(db.Model):
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.String, nullable=False)
+    user_password = db.Column(db.String, nullable=False)
+
+class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     price = db.Column(db.Integer, nullable=False)
@@ -39,17 +45,14 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
-
     destination_name = db.Column(db.String, nullable=True)
     destination_email = db.Column(db.String, nullable=True)
     destination_zipcode = db.Column(db.String, nullable=True)
     destination_address = db.Column(db.String, nullable=True)
     destination_tel = db.Column(db.String, nullable=True)
-    # orderItems = relationship('OrderItems',backref='orders')
-    # totalPrice = db.Column(db.Integer, nullable=True)
-    # orderDate = db.Column(db.Integer, nullable=True)
 
-class Carts(db.Model):
+
+class Cart(db.Model):
     # __tablename__ ='Cart'
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.Integer, nullable=False)
@@ -58,6 +61,7 @@ class Carts(db.Model):
     user_id = db.Column(db.String, nullable=False)
 
 class OrderItems(db.Model):
+    __tablename__='order_items'
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, nullable=False) #db.ForeignKey('orders.id')
     cart_id = db.Column(db.Integer, nullable=False)
@@ -74,7 +78,7 @@ def home():
         name_list=[]
         price_list=[]
         image_list=[]
-        Items = ItemTable.query.all()
+        Items = Item.query.all()
         for item in Items:
             id = item.id
             name = item.name
@@ -104,7 +108,7 @@ def detail(Id):
         user_id= 1
         user_id= 3
         quantity= data['post_quantity']
-        new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
+        new_orderItem = Cart(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
         db.session.add(new_orderItem)
         db.session.commit()
         print('DBにCart追加完了')
@@ -118,7 +122,22 @@ def detail(Id):
             new_record = Order(status=0, user_id=str(user))
             db.session.add(new_record)
             db.session.commit()
-            print('DBにOrder追加完了')
+
+            print('DBにOrder追加完了')  
+
+
+
+        # Orderテーブルでuser_idでソートし、orderedが0のものがないか検索する処理
+        # カートに0件のときの処理（ Orderにorderedが0のものがないとき）
+            # Order()でレコードを生成
+        # カートに1件以上あるときの処理（Orderにorderedが0のものがあるとき）
+            # Order()でレコードは生成しない。
+        
+        # 注文確定ボタンの処理
+        # Cartテーブルからidを取得する（複数件になる可能性あり）→変数に入れる（リスト）
+        # Orderテーブルからorderedが0のidを取得する（1件）
+        # リストに入っている分のidをforで回してCart_idとし、order_idはOrderのidとしてINSERT（add）を実行
+        
         return redirect('/')
 
 def toDict(self):
@@ -138,7 +157,7 @@ def ordered():
     if request.method == 'GET':
         with get_connection() as conn:
             with conn.cursor() as cur:
-                sql = 'SELECT carts.id, carts.quantity, item_table.id, item_table.name, item_table.price, item_table.image FROM carts JOIN item_table ON carts.item_id = item_table.id WHERE carts.status = 0'
+                sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0'
                 cur.execute(sql)
                 result_list = cur.fetchall()
                 l = []
@@ -156,7 +175,7 @@ def ordered():
     destinationAddress = data['post_orderInfo']['destinationAddress']
     destinationTel = data['post_orderInfo']['destinationTel']
     order_id_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 0).first()
-    cart_id_tup = db.session.query(Carts.id).filter(Carts.user_id == str(user), Carts.status ==0).all()
+    cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == str(user), Cart.status ==0).all()
     order_id=order_id_tup[0]
     cart_ids=[]
     for cartId in cart_id_tup:
@@ -178,7 +197,7 @@ def ordered():
     db.session.commit()
     print('order情報追加・Orderのstatus変更完了')
 
-    cart_records_list = db.session.query(Carts).filter(Carts.user_id == str(user), Carts.status==0).all()
+    cart_records_list = db.session.query(Cart).filter(Cart.user_id == str(user), Cart.status==0).all()
     for cart_records in cart_records_list:
         cart_records.status = 1
         db.session.commit()
@@ -187,13 +206,14 @@ def ordered():
 
 @app.route('/delete_cartitem/<int:deleteId>', methods=['POST'])
 def deleteCartItem(deleteId):
-    status_update = db.session.query(Carts).filter(Carts.id == deleteId).first()
+    status_update = db.session.query(Cart).filter(Cart.id == deleteId).first()
     status_update.status = 9
     db.session.commit()
     return redirect('/')
 
-@app.route("/order_history",methods=['GET'])
+@app.route('/order_history',methods=['GET'])
 def history_test():
+    print('pyファイル動いてる')
     user = 3
     if request.method=='GET':
         # item_record = db.session.query(Cart.id,Cart.quantity,Cart.item_id,Item.name,Item.image,Cart.user_id).filter(Cart.user_id=='1').join(Item,Item.id==Cart.item_id).all()
@@ -225,9 +245,9 @@ def history_test():
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
-        order_lists= db.session.query(Carts.item_id,Carts.quantity,Order.id,Order.destination_name)\
-            .filter(Carts.user_id==str(user),Carts.status==1,Order.status==1)\
-            .join((OrderItems,OrderItems.cart_id==Carts.id),(Order,Order.id==OrderItems.order_id))\
+        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name)\
+            .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
+            .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
             .all()
         for order_list in order_lists:
             item_id_list.append(order_list[0])

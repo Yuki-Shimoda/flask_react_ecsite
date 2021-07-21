@@ -35,10 +35,10 @@ const OrderHistory = () => {
 
     // //初期表示        
     useEffect(() => {
-        Axios.get('http://127.0.0.1:5000/orderhistory')
+        Axios.get('http://127.0.0.1:5000/order_history')
         .then(function(res) {
-            setList(res.data.itemList)
-            console.log(res.data.itemList)
+            setList(res)
+            console.log(res.data)
         })
     }, [])
         
@@ -47,10 +47,11 @@ return (
   <Typography variant="h6" className={classes.title}>
     注文履歴
   </Typography>
-  <Grid container alignItems="center" justify="center">
+  {/* <Grid container alignItems="center" justify="center"> */}
+  <Grid container alignItems="center">
     <Grid item xs={6}>
-      <div className={classes.demo}>
-        <List>
+      <div className={classes.demo}>リスト
+        {/* <List>
           {list.map(item => {
               return (
                 <div className={classes.root}>
@@ -66,7 +67,7 @@ return (
                       />
                       <ListItemSecondaryAction>
                       <IconButton edge="end" aria-label="delete">
-                          {/* <DeleteIcon /> */}削除
+                          <DeleteIcon />削除
                       </IconButton>
                       </ListItemSecondaryAction>
                   </ListItem>
@@ -74,7 +75,7 @@ return (
                 </div>
               )
           })}
-        </List>
+        </List> */}
       </div> 
     </Grid>
   </Grid>

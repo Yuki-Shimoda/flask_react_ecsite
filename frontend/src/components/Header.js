@@ -48,7 +48,6 @@ const Header =() => {
           <React.Fragment>
             <Router>
             <Button onClick={() => handleLink('/')}>Home</Button>
-            <Button onClick={() => handleLink('/home1')}>Home1</Button>
             <Button onClick={() => handleLink('/cart')}>カート</Button>
             <Button onClick={() => handleLink('/item_detail')}>商品詳細</Button>
             <Button onClick={() => toOrderHistory()}>注文履歴</Button>
