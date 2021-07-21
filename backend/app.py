@@ -45,6 +45,7 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
+
     destination_name = db.Column(db.String, nullable=True)
     destination_email = db.Column(db.String, nullable=True)
     destination_zipcode = db.Column(db.String, nullable=True)

@@ -9,7 +9,7 @@ import Complete from './Complete'
 import OrderHistory from './OrderHistory';
 import Login from './Login';
 import Signup from './Signup';
-import Home1 from './Home1.js'
+// import Home1 from './Home1.js'
 
 function App() {
   return (

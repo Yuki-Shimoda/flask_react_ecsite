@@ -14,7 +14,7 @@ from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:******@localhost:5432/****'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SECRET_KEY'] = 'secret_key'
