@@ -14,7 +14,6 @@ const Cart = () => {
     const [cart, setCart] = useState([]);
     const [flag, setFlag] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
-    const [updateId, setUpdateId] = useState(0);
 
     const createTotalPrice = () => {
         let total = 0;
@@ -36,16 +35,6 @@ const Cart = () => {
         createTotalPrice();
     })
 
-    // const changeQuantity = (updateId) => {
-    //     let num = e.target.value;
-    //     axios.post(`http://127.0.0.1:5000/item_quantity/${updateId}`, {post_quantity: num});
-    //     // console.log(num,updateId)
-    // }
-
-    // const getUpdateId = (id) => {
-    //     console.log(id)
-    // }
-
     const deleteCartItem = (deleteId) => {
         axios.post(`http://127.0.0.1:5000/delete_cartitem/${deleteId}`);
         const fetchCart = async () => {
@@ -60,7 +49,7 @@ const Cart = () => {
         <React.Fragment>
 
             {
-                cart.length == 0 ? <p>カートに商品はありません</p> :
+                cart.length === 0 ? <p>カートに商品はありません</p> :
                     <TableContainer component={Paper}>
                         <Table>
                             <TableHead>
@@ -104,10 +93,10 @@ const Cart = () => {
             }
             <p>{totalPrice}</p>
             {
-                cart.length == 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
+                cart.length === 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
             }
             {
-                flag == false ? <></> :<Form />
+                flag === false ? <></> :<Form />
             }
         </React.Fragment>
     );

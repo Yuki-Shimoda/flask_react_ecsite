@@ -1,0 +1,28 @@
+{% extends 'admin/base.html' %}
+
+{% block access_control %}
+{% if current_user.is_authenticated %}
+<head>
+   <!-- BootstrapのCSS読み込み -->
+  <link rel="stylesheet" href="../static/css/bootstrap.css">
+  <link rel="stylesheet" href="../static/css/bootstrap.css.map">
+</head>
+<body>
+<div class="btn-group pull-right">
+  <a class="btn dropdown-toggle" data-toggle="dropdown" href="/logout">
+    <i class="icon-user"></i> {{ current_user.login }} <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="{{ url_for('admin.logout_view') }}">ログアウト</a></li>
+  </ul>
+</div>
+  <!-- jQuery読み込み -->
+  <script src="../static/js/jquery-3.6.0.min.js"></script>
+  <!-- Bootstrapのjs読み込み -->
+  <script src="../static/js/bootstrap.bundle.js"></script>
+</body>
+{% endif %}
+{% endblock %}
+
+
+

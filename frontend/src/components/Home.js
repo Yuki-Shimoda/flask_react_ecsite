@@ -46,4 +46,6 @@ const Home = () => {
     )
 }
 
-export default Home
+export default Home;
+
+{/* <p>画像パス：{itemList[id].image}</p> */}

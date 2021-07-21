@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, request, redirect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import *
@@ -40,13 +39,13 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
+
     destination_name = db.Column(db.String, nullable=True)
     destination_email = db.Column(db.String, nullable=True)
     destination_zipcode = db.Column(db.String, nullable=True)
     destination_address = db.Column(db.String, nullable=True)
     destination_tel = db.Column(db.String, nullable=True)
     # orderItems = relationship('OrderItems',backref='orders')
-
     # totalPrice = db.Column(db.Integer, nullable=True)
     # orderDate = db.Column(db.Integer, nullable=True)
 
@@ -90,6 +89,7 @@ def home():
             id_id = 0
             for id in id_list:
                 dic_item[id] ={}
+                dic_item[id]['id']= id_list[id_id]
                 dic_item[id]['name']=name_list[id_id]
                 dic_item[id]['price']=price_list[id_id]
                 dic_item[id]['image']=image_list[id_id]
@@ -103,18 +103,10 @@ def detail(Id):
         item_id = Id
         user_id= 1
         user_id= 3
-        # item_id = data['post_item']
         quantity= data['post_quantity']
-        # new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
-        carts = db.session.query(Carts).all()
-        for cart in carts:
-            if cart.status == 0 and cart.item_id != item_id:
-                new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
-                db.session.add(new_orderItem)
-                db.session.commit()
-
-        # db.session.add(new_orderItem)
-        # db.session.commit()
+        new_orderItem = Carts(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
+        db.session.add(new_orderItem)
+        db.session.commit()
         print('DBにCart追加完了')
 
         user = 3
@@ -134,9 +126,10 @@ def toDict(self):
             'id': self[0],
             'quantity':self[1],
             'item': {
-                'name': self[2],
-                'price': self[3],
-                'image': self[4]
+                'item_id': self[2],
+                'name': self[3],
+                'price': self[4],
+                'image': self[5]
             }
     }
 
@@ -145,7 +138,7 @@ def ordered():
     if request.method == 'GET':
         with get_connection() as conn:
             with conn.cursor() as cur:
-                sql = 'SELECT carts.id, carts.quantity, item_table.name, item_table.price, item_table.image FROM carts JOIN item_table ON carts.item_id = item_table.id WHERE carts.status = 0 ORDER BY id ASC'
+                sql = 'SELECT carts.id, carts.quantity, item_table.id, item_table.name, item_table.price, item_table.image FROM carts JOIN item_table ON carts.item_id = item_table.id WHERE carts.status = 0'
                 cur.execute(sql)
                 result_list = cur.fetchall()
                 l = []
@@ -156,7 +149,6 @@ def ordered():
 
     user = 1
     user = 3
-    print(request.get_json())
     data = request.get_json()
     destinationName = data['post_orderInfo']['destinationName']
     # destinationEmail = data['post_orderInfo']['destinationEmail']
@@ -177,6 +169,7 @@ def ordered():
 
     order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
     order_record = order_record[0]
+
     order_record.destination_name = destinationName
     order_record.destination_zipcode = destinationZipcode
     order_record.destination_address = destinationAddress
@@ -207,12 +200,12 @@ def history_test():
         # print(item_record)
         #ordersテーブルのidをuser_idとstatus:0でソート
         orderIds_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 1).all()
-        print(orderIds_tup) # [(1,)(2,)]
+        # print(orderIds_tup) # [(1,)(2,)]
         # ordersのidをリスト・タプル型からリスト型に
         orderIds =[]
         for orderId in orderIds_tup:
             orderIds.append(orderId[0])
-        print(orderIds) # [1,2]
+        # print(orderIds) # [1,2]
         
         # order_history= db.session.query(Item.name,Item.image,Cart.quantity).filter(Cart.user_id ==str(user), Cart.status==1).join(Cart,Cart.item_id==Item.id).all()
         # print(order_history)
@@ -232,22 +225,15 @@ def history_test():
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
-        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name)\
-            .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
-            .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
+        order_lists= db.session.query(Carts.item_id,Carts.quantity,Order.id,Order.destination_name)\
+            .filter(Carts.user_id==str(user),Carts.status==1,Order.status==1)\
+            .join((OrderItems,OrderItems.cart_id==Carts.id),(Order,Order.id==OrderItems.order_id))\
             .all()
-        # print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
-        # print(item_id_list)
-        # print(quantity_list)
-        # print('↓order_id_list')
-        # print(order_id_list)
-        # print(destination_name_list)
-
         id_id=0
         for order_id in order_id_list:
             if resdata.get(order_id) is None:
@@ -261,7 +247,7 @@ def history_test():
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
                 id_id+=1
 
-        print(resdata)
+        # print(resdata)
         print('orderHistory')
         redirect('/')
     return jsonify(resdata)
