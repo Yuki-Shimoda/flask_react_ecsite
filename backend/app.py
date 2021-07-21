@@ -26,16 +26,11 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
-
     destination_name = db.Column(db.String, nullable=True)
     destination_email = db.Column(db.String, nullable=True)
     destination_zipcode = db.Column(db.String, nullable=True)
     destination_address = db.Column(db.String, nullable=True)
     destination_tel = db.Column(db.String, nullable=True)
-    # orderItems = relationship('OrderItems',backref='orders')
-    # totalPrice = db.Column(db.Integer, nullable=True)
-    # orderDate = db.Column(db.Integer, nullable=True)
-
 
 
 class Cart(db.Model):
@@ -121,7 +116,7 @@ def detail(Id):
             new_record = Order(status=0, user_id=str(user))
             db.session.add(new_record)
             db.session.commit()
-            print('DBにOrder追加完了')
+            print('DBにOrder追加完了')  
 
 
 
@@ -188,6 +183,7 @@ def ordered():
 
 @app.route("/order_history",methods=['GET'])
 def history_test():
+    print('pyファイル動いてる')
     user = 3
     if request.method=='GET':
         # item_record = db.session.query(Cart.id,Cart.quantity,Cart.item_id,Item.name,Item.image,Cart.user_id).filter(Cart.user_id=='1').join(Item,Item.id==Cart.item_id).all()

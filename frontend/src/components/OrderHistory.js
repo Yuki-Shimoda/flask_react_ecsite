@@ -47,7 +47,8 @@ return (
   <Typography variant="h6" className={classes.title}>
     注文履歴
   </Typography>
-  <Grid container alignItems="center" justify="center">
+  {/* <Grid container alignItems="center" justify="center"> */}
+  <Grid container alignItems="center">
     <Grid item xs={6}>
       <div className={classes.demo}>
         <List>
