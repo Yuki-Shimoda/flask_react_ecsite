@@ -1,9 +1,10 @@
 
-from flask import Flask, render_template, request, redirect,jsonify
+from flask import Flask, render_template, request, redirect,jsonify,make_response
+from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import jwt
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -31,7 +32,6 @@ class Order(db.Model):
     destination_address = db.Column(db.String, nullable=True)
     destination_tel = db.Column(db.String, nullable=True)
     # orderItems = relationship('OrderItems',backref='orders')
-
     # totalPrice = db.Column(db.Integer, nullable=True)
     # orderDate = db.Column(db.Integer, nullable=True)
 
@@ -85,6 +85,7 @@ def home():
             id_id = 0
             for id in id_list:
                 dic_item[id] ={}
+                dic_item[id]['id']= id_list[id_id]
                 dic_item[id]['name']=name_list[id_id]
                 dic_item[id]['price']=price_list[id_id]
                 dic_item[id]['image']=image_list[id_id]
@@ -92,6 +93,8 @@ def home():
     # print(dic_item)
     # dt_now=datetime.now()
     # print('現在時間',dt_now)
+    print(dic_item)
+
     return jsonify(dic_item)
     # showItems()
 
@@ -104,7 +107,7 @@ def detail(Id):
     #     return Id
     if request.method =='POST':
         # Cartテーブルにレコード追加
-        print(request.get_json())
+        print(request.get_json())                       
         data = request.get_json()
         item_id = Id
         user_id= 1
@@ -173,7 +176,9 @@ def ordered():
 
     order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
     order_record = order_record[0]
+
     # order_record.ordered_date = ordered_record
+
     order_record.destination_name = destinationName
     order_record.destination_zipcode = destinationZipcode
     order_record.destination_address = destinationAddress
@@ -256,12 +261,32 @@ def signup():
         new_user = User(user_name=input_name, user_id=input_id, user_password=input_password)
         db.session.add(new_user)
         db.session.commit()
-
     return data
 
-@app.route('/login',methods=['POST'])
+@app.route('/login',methods=['GET','POST'])
 def login():
-    return 'aiu'
+    userInfo={}
+    if request.method =='POST':
+        data = request.get_json()
+        input_id = data['userLoginInfo']['post_id']
+        input_password = data['userLoginInfo']['post_password']
+        user =User.query.filter_by(user_id=input_id).first()
+        # print(input_password)
+        # print(user.user_password)
+        if not check_password_hash(user.user_password, input_password):
+            print('パスワードまたはユーザー名が一致しません')
+            redirect('/')
+            return make_response('Password is incorrect', 400)
+        else:
+            # exp = datetime.utcnow() + datetime.timedelta(hours=1)
+            # encoded = jwt
+            userInfo['name']= user.user_name
+            print('合っています')
+            redirect('/')
+            print(userInfo['name'])
+            return 'ユーザー名'
+    elif request.method == 'GET':
+        return 'ユーザー名'
 if __name__ == "__main__":
     app.debug = True
     app.run(host='127.0.0.1', port=5000)
