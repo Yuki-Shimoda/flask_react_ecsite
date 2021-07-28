@@ -13,7 +13,7 @@ from sqlalchemy.orm import relationship
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
@@ -23,8 +23,8 @@ def get_connection():
     localhost = 'localhost'
     port = '5432'
     users = 'postgres'
-    dbnames = '****'
-    passwords = '****'
+    dbnames = 'fr_ec'
+    passwords = 'mwmw1225zwzw'
     return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
 
 class Item(db.Model):
