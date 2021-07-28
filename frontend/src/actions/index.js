@@ -19,6 +19,51 @@ export const deleteItem = () => ({
   type:DELETEITEM
 })
 
+export const SIGNUP ='signup'
+export const signup = (username, userid, password) =>{
+  return ()=>{
+    Axios.post(`http://127.0.0.1:5000/signup`,{userInfo:{post_name:username,post_id:userid,post_password:password}})
+    // .then(function(res){
+    //   console.log(res.data)
+    // })
+  }
+}
+
+export const LOGIN = 'login'
+export const login =(id, password)=> dispatch=>{
+  Axios.post('http://127.0.0.1:5000/login',{userLoginInfo:{post_id:id, post_password:password}})
+  .then(function(res){ // {'name': '名前3', 'id': 'user3'}
+    let userId = res.data.id
+    let userName = res.data.name
+    return dispatch(setUserInfo(userId, userName))
+  })
+}
+
+export const SET_USER_INFO ='setUserInfo'
+export const setUserInfo = (uid, name) => {
+  return (
+    {
+      type: SET_USER_INFO,
+      uid: uid,
+      name: name,
+      login_user: true
+    }
+  )
+}
+
+export const DELETE_USER_INFO ='deleteUserInfo'
+export const deleteUserInfo = () => {
+  Axios.post('http://127.0.0.1:5000/logout')
+  return (
+    {
+      type: DELETE_USER_INFO,
+      uid: '',
+      name: '',
+      login_user: false
+    }
+  )
+}
+
 // カートに商品を追加
 //指定ユーザーのカートテーブルstatus0のものをDBから取得
 // export const CARTSET = 'cartSet'
@@ -43,6 +88,7 @@ export const CARTRESET = 'cartReset'
 export const cartReset = () => ({
   type:CARTRESET
 })
+
 
 // export const NEWCART = 'newCart'
 // export const newCart = (user, cart) => dispatch => {
@@ -198,4 +244,24 @@ export const cartReset = () => ({
 //       orderInfo:orderInfo
 //     })
 //   })
+// }
+
+
+
+// export const changeRoutingStatus = () => {
+//   return (
+//     {
+//       type: CHANGE_ROUTING_STATUS,
+//       routingJudge: 1
+//     }
+//   )
+// }
+
+// export const changeZeroRoutingStatus = () => {
+//   return (
+//     {
+//       type: CHANGE_ZERO_ROUTING_STATUS,
+//       routingJudge: 0
+//     }
+//   )
 // }

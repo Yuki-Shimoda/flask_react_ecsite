@@ -2,13 +2,17 @@ import React, {
   useState
 } from 'react';
 import { useHistory } from 'react-router-dom';
+import {useSelector, useDispatch} from "react-redux";
 import Axios from 'axios';
 
+const userSelector = state => state.userIdState;
 
 const Form = () => {
     const [values, setValue] = useState({});
     const history = useHistory();
     const handleLink = path => history.push(path);
+
+    const userIdState = useSelector(userSelector)
 
     const handleInputChange = e => {
       const { name, value } = e.target;
@@ -24,11 +28,13 @@ const Form = () => {
           destinationName: values.destinationName,
           destinationZipcode: values.destinationZipcode,
           destinationAddress: values.destinationAddress,
-          destinationTel: values.destinationTel
+          destinationTel: values.destinationTel,
+          post_uid:userIdState.uid
         }
       })
         handleLink('/complete')
     }
+
   
     return (
       <React.Fragment>
