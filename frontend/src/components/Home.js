@@ -1,9 +1,9 @@
-import React,{useState, useEffect} from 'react';
+import React, { useEffect, useState } from "react";
 // import {BrowserRouter as Router,useHistory,} from 'react-router-dom';
 // import Axios from 'axios'; actionsで実行
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { setItem, deleteItem } from "../actions/index";
+import { setItem} from "../actions/index";
 import { Button } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -44,13 +44,16 @@ const useStyles = makeStyles({
     },
   });
 
+// const itemsSelector = (state) => state.item.items;
+
 const Home = () => {
-    const classes = useStyles();
+  const classes = useStyles();
 　//stateの中のitems情報[]を取得し、セレクターで使用。itemsをarrayにセット 　
-  const itemsSelector = (state) => state.item.items;
-  const items = useSelector(itemsSelector);
+  // const items = useSelector(itemsSelector);
+  const selector = useSelector(state => state)
+  let items = selector.item.items
   const [array, setArray] = useState(items);
-  // console.log(items)
+  console.log(items)
   const [mozi, setMozi] = useState("");
   const [resultState, setResultState] = useState(false);
   const [karamozi, setKaramozi] = useState(false);
@@ -58,9 +61,6 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(setItem());
-    return () => {
-      dispatch(deleteItem());
-    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -244,7 +244,6 @@ const Home = () => {
 
     // )
 }
-
 
 export default Home;
 

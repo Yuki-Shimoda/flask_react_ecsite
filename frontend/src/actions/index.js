@@ -1,7 +1,6 @@
 // import {CART_STATUS_IN} from './status'
 import Axios from 'axios';
 
-
 //初期表示商品情報
 export const SETITEM = 'setItem'
 export const setItem = () => dispatch => {
@@ -18,6 +17,30 @@ export const DELETEITEM = 'deleteItem'
 export const deleteItem = () => ({
   type:DELETEITEM
 })
+
+//注文済商品情報
+export const ORDERED = 'ordered'
+export const ordered = (id,quantity) => dispatch => {
+  Axios.get('http://127.0.0.1:5000/order_history/')
+  .then(function(res) {
+      console.log(res.data) //{{3: {…}, 4: {…}, 5: {…}}} 
+      const data = Object.values(res.data) //[{…}, {…}, {…}]
+      return dispatch({
+        type:ORDERED,
+        orderData:data
+      })
+  })
+}
+
+//注文済商品キャンセル
+export const ORDERCANCEL = 'orderCancel'
+export const orderCancel = (id) => dispatch => {
+  Axios.post(`http://127.0.0.1:5000/order_history/${id}`)
+  // return dispatch({
+  //   type:ORDERED,
+  // })
+  return ('OK')
+}
 
 export const SIGNUP ='signup'
 export const signup = (username, userid, password) =>{
@@ -65,29 +88,30 @@ export const deleteUserInfo = () => {
 }
 
 // カートに商品を追加
-//指定ユーザーのカートテーブルstatus0のものをDBから取得
+// 指定ユーザーのカートテーブルstatus0のものをDBから取得
 // export const CARTSET = 'cartSet'
 // export const cartSet = (id, quantity) => dispatch => {
-//   const user = 3
-//   Axios.post('http://127.0.0.1:5000/item_detail/${id}',{post_quantity:quantity}).then( => {
+//   const id = 3
+//   Axios.post('http://127.0.0.1:5000/item_detail/${id}',{post_quantity:quantity}).then( res => {
+//     console.log(res)
+//     data = res.data
 //   // Axios.post(`users/${user.uid}/orders`).get().then(snapshot => {
-//     snapshot.forEach(item => {
-//       const data = item.data()
-//       data.orderId = item.id
+//     // snapshot.forEach(item => {
+//     //   const data = item.data()
+//     //   data.orderId = item.id
 //       // if(data.status === CART_STATUS_IN){
 //         // if(data.status === 0)
 //           dispatch ({
 //             type:CARTSET,
 //             cartData:data
 //           })
-//       } 
-//     })
-//   })
-// }
-export const CARTRESET = 'cartReset'
-export const cartReset = () => ({
-  type:CARTRESET
-})
+//       }) 
+//     )
+//   }
+// export const CARTRESET = 'cartReset'
+// export const cartReset = () => ({
+//   type:CARTRESET
+// })
 
 
 // export const NEWCART = 'newCart'
@@ -235,33 +259,3 @@ export const cartReset = () => ({
 // export const userInfoReset = () => ({
 //   type:USERINFORESET
 // })
-
-// export const ORDERCANCEL = 'orderCancel'
-// export const orderCancel = (user,orderInfo) => dispatch => {
-//   firebase.firestore().collection(`users/${user.uid}/orders`).doc(orderInfo.orderId).update(orderInfo).then(() => {
-//     return dispatch ({
-//       type:ORDERCANCEL,
-//       orderInfo:orderInfo
-//     })
-//   })
-// }
-
-
-
-// export const changeRoutingStatus = () => {
-//   return (
-//     {
-//       type: CHANGE_ROUTING_STATUS,
-//       routingJudge: 1
-//     }
-//   )
-// }
-
-// export const changeZeroRoutingStatus = () => {
-//   return (
-//     {
-//       type: CHANGE_ZERO_ROUTING_STATUS,
-//       routingJudge: 0
-//     }
-//   )
-// }

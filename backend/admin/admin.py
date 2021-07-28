@@ -1,6 +1,7 @@
-from flask import Flask, render_template
-from flask_admin import Admin
-from models import Item, Order, Cart, OrderItems
+from flask import Flask
+from flask_admin import Admin 
+from models import db
+from models import Item, Order, Cart, OrderItems 
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, redirect, url_for
 from wtforms import form, fields, validators
@@ -11,17 +12,20 @@ from flask_admin.contrib import sqla
 from flask_admin import helpers, expose
 from flask_bootstrap import Bootstrap
 
-
+# app という名前でインスタンス化
+# flaskクラスのappオブジェクト
 app = Flask(__name__)
-
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
-
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:postgres@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SECRET_KEY'] = 'secret_key'
-db = SQLAlchemy(app)
 bootstrap = Bootstrap(app)
+db = SQLAlchemy(app)
 
-#model
+# アプリケーションコンテキストにdbが使うグローバル変数を設定
+# db.init_app(app)
+# with app.app_context():
+#     db.create_all()
+
 class AdminUser(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   login = db.Column(db.String(50), unique=True)
@@ -154,3 +158,5 @@ admin.add_view(MyModelView(OrderItems, db.session))
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+db.create_all()

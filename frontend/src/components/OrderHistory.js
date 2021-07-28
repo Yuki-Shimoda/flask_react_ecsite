@@ -1,85 +1,147 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import Axios from 'axios';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
-import IconButton from '@material-ui/core/IconButton';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import FolderIcon from '@material-ui/icons/Folder';
-// import DeleteIcon from '@material-ui/icons/Delete';
-import Divider from '@material-ui/core/Divider';
-
+import { useSelector, useDispatch } from "react-redux";
+import {List, Divider, ListItem, ListItemAvatar, ListItemText, Button, Grid} from '@material-ui/core';
+import { setItem, ordered, orderCancel, setUserInfo } from "../actions/index";
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-      flexGrow: 1,
-      maxWidth: 752,
+  orderList: {
+    background: theme.palette.grey["100"],
+    margin: '0 auto',
+    padding: 32,
+    [theme.breakpoints.down('sm')]: {
+      width: '100%'
     },
-    demo: {
-      backgroundColor: theme.palette.background.paper,
-    },
-    title: {
-      margin: theme.spacing(4, 0, 2),
-    },
-  }));
+    [theme.breakpoints.up('md')]: {
+      width: 768
+    }
+  },
+  list: {
+    background: '#fff',
+    height: 'auto'
+  },
+  image: {
+    objectFit: 'cover',
+    margin: '8px 16px 8px 0',
+    height: 96,
+    width: 96
+  },
+  text: {
+    width: '100%'
+  },
+  title: {
+    flexGrow: 1,
+  }
+}))
 
 const OrderHistory = () => {
-    const [list, setList] = useState([])
-    const classes = useStyles();
-    const [secondary, setSecondary] = React.useState(false);
+  console.log('renndar')
+  const selector = useSelector(state => state)
+  let items = selector.item.items
+  let order = selector.ordered.orders
+  let user = selector.setUserInfo
+  console.log(order)
+  console.log(user)
+  const classes = useStyles();
+  const dispatch = useDispatch();
 
-    // //初期表示        
-    useEffect(() => {
-        Axios.get('http://127.0.0.1:5000/orderhistory')
-        .then(function(res) {
-            setList(res.data.itemList)
-            console.log(res.data.itemList)
-        })
-    }, [])
-        
+useEffect(() => {
+  dispatch(setItem())
+  dispatch(ordered())
+  dispatch(setUserInfo())
+  // dispatch(orderCancel())
+}, [dispatch]);
+
+const CancelBtn = (order) => {
+  // console.log(order.order_id)
+  dispatch(orderCancel(order.order_id))
+}
+const orderNum = order.length
+
 return (
-  <>
-  <Typography variant="h6" className={classes.title}>
-    注文履歴
-  </Typography>
-  <Grid container alignItems="center" justify="center">
-    <Grid item xs={6}>
-      <div className={classes.demo}>
-        <List>
-          {list.map(item => {
-              return (
-                <div className={classes.root}>
-                  <ListItem>
+  <React.Fragment>
+    <h1 align="center">注文履歴</h1>
+    { orderNum > 0 ? (
+      <section className="c-section-wrapin">
+        {order.filter((order) => {
+          return order.status === 1
+          }).map((order) => (
+              <List className={classes.orderList} key={order.order_id}>
+                <div className="module-spacer--small" />
+              <div>注文日時：</div>
+              {order.item_list.map((data, index) => ( //data = {item_id: 2, quantity: 3 }
+                <List key={index}>
+                  {items.filter((item) => {
+                    return data.item_id === item.id
+                  }).map((item) => (
+
+                    <ListItem className={classes.list} key={index}>
                       <ListItemAvatar>
-                      <Avatar>
-                          <FolderIcon />
-                      </Avatar>
+                        <img src={`${process.env.PUBLIC_URL}/static/images/${item.image}`} width="200" height="200" style={{objectFit: "cover"}}　alt='画像'></img>
                       </ListItemAvatar>
-                      <ListItemText               
-                      primary={item.id  + '番のitem名:' + item.quantity + '個'}
-                      secondary={secondary ? 'Secondary text' : '商品説明'}
-                      />
-                      <ListItemSecondaryAction>
-                      <IconButton edge="end" aria-label="delete">
-                          {/* <DeleteIcon /> */}削除
-                      </IconButton>
-                      </ListItemSecondaryAction>
+                      <div className={classes.text} />
+                      <div className={classes.text}>
+                      <ListItemText primary={item.name} />
+                      <ListItemText secondary={"単価：" + Number(item.price).toLocaleString() + "円"}/>
+                      <ListItemText secondary={"数量：" + data.quantity + "杯"}/>
+                      </div>
+                    </ListItem>
+                  )
+                  )}
+                </List>
+              ))}
+              <div className="module-spacer--extra-extra-small" />
+              <Grid container justifyContent="flex-end">
+              <Button variant="outlined" onClick={() => CancelBtn(order)}>キャンセル</Button>
+              </Grid>
+              <p></p>
+              <Divider />
+              </List>
+            ))}
+          
+          {/* 支払い済、キャンセル済の時 */}
+          {order.filter((order) => {
+            return order.status === 9
+          }).map((order) => (
+        // {order.map((order) => (
+            <List className={classes.orderList} key={order.orderId}>
+              <div className="module-spacer--small" />
+            <div>注文日時：</div>
+            {order.item_list.map((data, index) => (
+              <List key={index}>
+                {items.filter((item) => {
+                  return data.item_id === item.id
+                }).map((item) => (
+                  <ListItem className={classes.list} key={index}>
+                  <ListItemAvatar>
+                  <img src={`${process.env.PUBLIC_URL}/static/images/${item.image}`} width="200" height="200" style={{objectFit: "cover"}} alt='画像'></img>
+                  </ListItemAvatar>
+                  <div className={classes.text} />
+                  <div className={classes.text}>
+                  <ListItemText primary={item.name} />
+                  <ListItemText secondary={"単価：" + Number(item.price).toLocaleString() + "円"}/>
+                  <ListItemText secondary={"数量：" + data.quantity + "杯"}/>
+                  </div>
                   </ListItem>
-                  <Divider />
-                </div>
-              )
-          })}
-        </List>
-      </div> 
-    </Grid>
-  </Grid>
-  </>
-)
+                ))}
+              </List>
+                )
+            )}
+          <div className="module-spacer--extra-extra-small" />
+          <Grid container justifyContent="flex-end">
+          <span>キャンセル済み</span>
+          </Grid>
+          <p></p>
+          <Divider />
+          </List>
+        )
+      )}
+      </section>
+    ):(
+      <p align="center">注文履歴がありません</p>
+    )} 
+      </React.Fragment>
+    );
 }
 
-export default OrderHistory 
+export default OrderHistory; 

@@ -12,6 +12,7 @@ import psycopg2
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__, static_folder='.', static_url_path='')
+
 CORS(app, support_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -40,15 +41,11 @@ class Order(db.Model):
     status =db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.String, nullable=False)
     payment_id = db.Column(db.Integer, nullable=True)
-
     destination_name = db.Column(db.String, nullable=True)
     destination_email = db.Column(db.String, nullable=True)
     destination_zipcode = db.Column(db.String, nullable=True)
     destination_address = db.Column(db.String, nullable=True)
     destination_tel = db.Column(db.String, nullable=True)
-    # orderItems = relationship('OrderItems',backref='orders')
-    # totalPrice = db.Column(db.Integer, nullable=True)
-    # orderDate = db.Column(db.Integer, nullable=True)
 
 
 class Cart(db.Model):
@@ -110,6 +107,7 @@ def home():
 @app.route('/item_detail/<int:Id>', methods=['POST'])
 def detail(Id):
     if request.method =='POST':
+        print('detail')
         # Cartテーブルにレコード追加
         print(request.get_json())        
         data = request.get_json() # {post_quantity:quantity,post_userId:uid}
@@ -117,7 +115,6 @@ def detail(Id):
         global user_id 
         user_id = data['post_userId']
         quantity= data['post_quantity']
-
         # cartテーブルに追加
         # 現在カートに入っている商品のitem_idを取得
         carts = db.session.query(Cart.item_id).filter(Cart.status == 0, Cart.user_id == user_id).all()
@@ -154,8 +151,21 @@ def detail(Id):
             new_record = Order(status=0, user_id=user_id)
             db.session.add(new_record)
             db.session.commit()
-            print('DBにOrder追加完了')
+
+        print('DBにOrder追加完了')
         return redirect('/')
+      
+        # Orderテーブルでuser_idでソートし、orderedが0のものがないか検索する処理
+        # カートに0件のときの処理（ Orderにorderedが0のものがないとき）
+            # Order()でレコードを生成
+        # カートに1件以上あるときの処理（Orderにorderedが0のものがあるとき）
+            # Order()でレコードは生成しない。
+        
+        # 注文確定ボタンの処理
+        # Cartテーブルからidを取得する（複数件になる可能性あり）→変数に入れる（リスト）
+        # Orderテーブルからorderedが0のidを取得する（1件）
+        # リストに入っている分のidをforで回してCart_idとし、order_idはOrderのidとしてINSERT（add）を実行
+
 
         # # すでに同じ商品がカートに入っていた場合、レコード追加ではなく個数のみ更新する処理
         # # user_id = user_idかつstatus = 0のitemを取ってくる
@@ -207,7 +217,7 @@ def ordered():
                 for item in result_list:
                     c = toDict(item)
                     l.append(c)
-            print('グローバルのuser_id：'+user_id)
+            print('グローバルのuser_id：'+ user_id)
             return jsonify(l)
 
     if request.method == 'POST':
@@ -233,7 +243,6 @@ def ordered():
 
         order_record = db.session.query(Order).filter(Order.user_id == user_id, Order.status ==0).all()
         order_record = order_record[0]
-
         order_record.destination_name = destinationName
         order_record.destination_zipcode = destinationZipcode
         order_record.destination_address = destinationAddress
@@ -257,33 +266,44 @@ def deleteCartItem(deleteId):
     db.session.commit()
     return redirect('/')
 
-@app.route("/order_history",methods=['GET'])
+@app.route('/order_history/', methods=['GET'])
 def history_test():
     global user_id
     if request.method=='GET':
+        print('histo')
+        print(str(user_id))
+
 
         resdata={}
         item_id_list=[]
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
-        #user_idとstatus:0でソート
-        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name)\
-            .filter(Cart.user_id==user_id,Cart.status==1,Order.status==1)\
+        status_list=[]
+        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status)\
+            .filter(Cart.user_id == user_id)\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
-            .all()
-        # print(order_lists)
+            .all()  
+        print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
+            status_list.append(order_list[4])
+        # print(item_id_list)
+        # print(quantity_list)
+        # print('↓order_id_list')
+        # print(order_id_list)
+        # print(destination_name_list)
 
         id_id=0
         for order_id in order_id_list:
             if resdata.get(order_id) is None:
                 resdata[order_id]={}
+                resdata[order_id]['order_id']=order_id_list[id_id]
                 resdata[order_id]['destination_name']= destination_name_list[id_id]
+                resdata[order_id]['status']= status_list[id_id]
                 resdata[order_id]['item_list']= []
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
                 id_id+=1
@@ -291,11 +311,21 @@ def history_test():
                 #既にresdata[order_id]が存在している場合（1注文で複数種類の商品を購入した場合）
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
                 id_id+=1
-
         # print(resdata)
         print('orderHistory')
         redirect('/')
-    return jsonify(resdata)
+        return jsonify(resdata)
+
+
+@app.route('/order_history/<int:id>', methods=['POST'])
+def order_cancel(id):
+    if request.method=='POST':
+        status_update = db.session.query(Order).filter(Order.id == id).first()
+        status_update.status = 9
+        db.session.commit()
+        return redirect('/')
+
+
 
 @app.route('/signup',methods=['POST'])
 def signup():
@@ -336,6 +366,7 @@ def login():
             return userInfo
     elif request.method == 'GET':
         return 'ユーザー名'
+
 @app.route('/logout',methods=['POST'])
 def logout():
     # ログアウトされたらグローバル変数のuser_idのユーザー情報を削除
