@@ -15,13 +15,7 @@ from flask_bootstrap import Bootstrap
 # app という名前でインスタンス化
 # flaskクラスのappオブジェクト
 app = Flask(__name__)
-<<<<<<< HEAD
 app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:postgres@localhost:5432/fr_ec'
-=======
-
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:******@localhost:5432/****'
-
->>>>>>> 14fa181252ebf671e5154251d8943e647d70d578
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SECRET_KEY'] = 'secret_key'
 bootstrap = Bootstrap(app)

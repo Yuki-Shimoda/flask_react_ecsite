@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from "react-redux";
 import {List, Divider, ListItem, ListItemAvatar, ListItemText, Button, Grid} from '@material-ui/core';
-import { setItem, ordered, orderCancel } from "../actions/index";
+import { setItem, ordered, orderCancel, setUserInfo } from "../actions/index";
 
 const useStyles = makeStyles((theme) => ({
   orderList: {
@@ -39,15 +39,16 @@ const OrderHistory = () => {
   const selector = useSelector(state => state)
   let items = selector.item.items
   let order = selector.ordered.orders
+  let user = selector.setUserInfo
   console.log(order)
-
-  console.log(order)
+  console.log(user)
   const classes = useStyles();
   const dispatch = useDispatch();
 
 useEffect(() => {
   dispatch(setItem())
   dispatch(ordered())
+  dispatch(setUserInfo())
   // dispatch(orderCancel())
 }, [dispatch]);
 
@@ -119,8 +120,8 @@ return (
                   <div className={classes.text}>
                   <ListItemText primary={item.name} />
                   <ListItemText secondary={"単価：" + Number(item.price).toLocaleString() + "円"}/>
-                    <ListItemText secondary={"数量：" + data.quantity + "杯"}/>
-                    </div>
+                  <ListItemText secondary={"数量：" + data.quantity + "杯"}/>
+                  </div>
                   </ListItem>
                 ))}
               </List>

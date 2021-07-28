@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect,jsonify,make_respons
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
+from sqlalchemy.sql.functions import user
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from flask_cors import CORS
@@ -19,7 +20,6 @@ CORS(app, support_credentials=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    
 app.config['JSON_AS_ASCII'] = False
-
 
 db = SQLAlchemy(app)
 
@@ -72,7 +72,9 @@ class User(db.Model):
     user_id = db.Column(db.String, nullable=False)
     user_password = db.Column(db.String, nullable=False)
 
-# db.create_all()
+db.create_all()
+
+user_id = ''
 
 
 @app.route('/', methods=['GET'])
@@ -103,42 +105,61 @@ def home():
                 dic_item[id]['price']=price_list[id_id]
                 dic_item[id]['image']=image_list[id_id]
                 id_id+=1
-    # print(dic_item)
     # dt_now=datetime.now()
     # print('現在時間',dt_now)
-    print(dic_item)
+
+    # print(dic_item)
     return jsonify(dic_item)
 
 @app.route('/item_detail/<int:Id>', methods=['POST'])
 def detail(Id):
     if request.method =='POST':
+        print('detail')
         # Cartテーブルにレコード追加
         print(request.get_json())        
         data = request.get_json()
         item_id = Id
-        user_id= 1
+        # user_id= 1
+        global user_id 
+        user_id = data['post_userId']
         # item_id = data['post_item']
 
         quantity= data['post_quantity']
-        new_orderItem = Cart(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
-        db.session.add(new_orderItem)
-        db.session.commit()
-        print('DBにCart追加完了')
 
-        user = 1
-        u_id = db.session.query(Order).filter(Order.user_id == str(user), Order.status ==0).all()
+        # status = 0のitemを取ってくる
+        carts = db.session.query(Cart.item_id).filter(Cart.status == 0).all()
+        item_id_list = []
+        for i_d in carts:
+            item_id_list.append(i_d[0])
+
+        new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
+        if len(carts) == 0:
+            db.session.add(new_orderItem)
+            db.session.commit()
+            return redirect('/')
+        else:
+            if item_id in item_id_list:
+                db.session.query(Cart).filter(Cart.item_id == new_orderItem.item_id).update({'quantity': Cart.quantity + int(quantity)})
+                db.session.commit()
+                return redirect('/')
+            else:
+                db.session.add(new_orderItem)
+                db.session.commit()
+                return redirect('/')
+
+        # user = 1
+        u_id = db.session.query(Order).filter(Order.user_id == str(user_id), Order.status ==0).all()
         if u_id:
             print('重複したuser_idにてstatus:0のレコードを発見')
             return redirect('/')
         else:
-            new_record = Order(status=0, user_id=str(user))
+            new_record = Order(status=0, user_id=str(user_id))
             db.session.add(new_record)
             db.session.commit()
 
-            print('DBにOrder追加完了')  
-
-
-
+        print('DBにOrder追加完了')
+        return redirect('/')
+      
         # Orderテーブルでuser_idでソートし、orderedが0のものがないか検索する処理
         # カートに0件のときの処理（ Orderにorderedが0のものがないとき）
             # Order()でレコードを生成
@@ -149,8 +170,7 @@ def detail(Id):
         # Cartテーブルからidを取得する（複数件になる可能性あり）→変数に入れる（リスト）
         # Orderテーブルからorderedが0のidを取得する（1件）
         # リストに入っている分のidをforで回してCart_idとし、order_idはOrderのidとしてINSERT（add）を実行
-        
-        return redirect('/')
+
 
 def toDict(self):
     return{
@@ -166,30 +186,36 @@ def toDict(self):
 
 @app.route('/cart', methods=['GET', 'POST'])
 def ordered():
-    user = 1
+    # user = 1
+    global user_id
     if request.method == 'GET':
         with get_connection() as conn:
             with conn.cursor() as cur:
-                sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0'
+                sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0 ORDER BY cart.id ASC'
                 cur.execute(sql)
                 result_list = cur.fetchall()
                 l = []
                 for item in result_list:
                     c = toDict(item)
                     l.append(c)
+            print('グローバルのuser_id：'+ user_id)
             return jsonify(l)
 
     # user = 1
     # user = 3
     if request.method == 'POST':
         data = request.get_json()
+        print(data)
         destinationName = data['post_orderInfo']['destinationName']
         # destinationEmail = data['post_orderInfo']['destinationEmail']
         destinationZipcode = data['post_orderInfo']['destinationZipcode']
         destinationAddress = data['post_orderInfo']['destinationAddress']
         destinationTel = data['post_orderInfo']['destinationTel']
-        order_id_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 0).first()
-        cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == str(user), Cart.status ==0).all()
+        user_id = data['post_orderInfo']['post_uid']
+        # order_id_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 0).first()
+        order_id_tup = db.session.query(Order.id).filter(Order.user_id == user_id, Order.status == 0).first()
+        # cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == str(user), Cart.status ==0).all()
+        cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == user_id, Cart.status ==0).all()
         order_id=order_id_tup[0]
         cart_ids=[]
         for cartId in cart_id_tup:
@@ -200,7 +226,8 @@ def ordered():
             db.session.add(item)
         db.session.commit()
 
-        order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
+        # order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
+        order_record = db.session.query(Order).filter(Order.user_id == user_id, Order.status ==0).all()
         order_record = order_record[0]
 
         # order_record.ordered_date = ordered_record
@@ -216,7 +243,8 @@ def ordered():
         db.session.commit()
         print('order情報追加・Orderのstatus変更完了')
 
-        cart_records_list = db.session.query(Cart).filter(Cart.user_id == str(user), Cart.status==0).all()
+        # cart_records_list = db.session.query(Cart).filter(Cart.user_id == str(user), Cart.status==0).all()
+        cart_records_list = db.session.query(Cart).filter(Cart.user_id == user_id, Cart.status==0).all()
         for cart_records in cart_records_list:
             cart_records.status = 1
             db.session.commit()
@@ -233,16 +261,10 @@ def deleteCartItem(deleteId):
 
 @app.route('/order_history/', methods=['GET'])
 def history_test():
-    user = 1
+    # global user_id
     if request.method=='GET':
-        # item_record = db.session.query(Cart.id,Cart.quantity,Cart.item_id,Item.name,Item.image,Cart.user_id).filter(Cart.user_id=='1').join(Item,Item.id==Cart.item_id).all()
-        # print(item_record)
-        
-        
-        # order_history3= db.session.query(OrderItems.order_id,Cart.item_id,Cart.quantity,Order.destination_name)\
-        #     .filter(Cart.user_id ==str(user), Cart.status==1)\
-        #     .join((OrderItems,Cart.id==OrderItems.cart_id),(Order,Order.id==OrderItems.order_id)).all()
-        # print(order_history3)
+        print('histo')
+        print(str(user_id))
 
         resdata={}
         item_id_list=[]
@@ -250,13 +272,11 @@ def history_test():
         order_id_list=[]
         destination_name_list=[]
         status_list=[]
-
-            # .filter(Cart.user_id==str(user),Cart.status==1,Order.status==1)\
         order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status)\
-            .filter(Cart.user_id==str(user))\
+            .filter(Cart.user_id == str('simo'))\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
-            .all()
-        # print(order_lists)
+            .all()  
+        print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
@@ -292,11 +312,10 @@ def history_test():
 @app.route('/order_history/<int:id>', methods=['POST'])
 def order_cancel(id):
     if request.method=='POST':
-        print('totot')
         status_update = db.session.query(Order).filter(Order.id == id).first()
         status_update.status = 9
         db.session.commit()
-    return redirect('/')
+        return redirect('/')
 
 
 
@@ -317,7 +336,7 @@ def signup():
 def login():
     userInfo={}
     if request.method =='POST':
-        data = request.get_json()
+        data = request.get_json() # {userLoginInfo:{post_id:id, post_password:password}})
         input_id = data['userLoginInfo']['post_id']
         input_password = data['userLoginInfo']['post_password']
         user =User.query.filter_by(user_id=input_id).first()
@@ -331,13 +350,23 @@ def login():
             # exp = datetime.utcnow() + datetime.timedelta(hours=1)
             # encoded = jwt
             userInfo['name']= user.user_name
+            userInfo['id']=user.user_id
             print('合っています')
             redirect('/')
-            print(userInfo['name'])
-            return 'ユーザー名'
+            print(userInfo) # {'name': '名前3', 'id': 'user3'}
+            # ログインに成功したらグローバル変数のuser_idにユーザーidを設置
+            global user_id
+            user_id = userInfo['id']
+            return userInfo
     elif request.method == 'GET':
         return 'ユーザー名'
 
+@app.route('/logout',methods=['POST'])
+def logout():
+    # ログアウトされたらグローバル変数のuser_idのユーザー情報を削除
+    global user_id
+    user_id = ''
+    return 'グローバルのuser_id削除'
 if __name__ == "__main__":
     app.debug = True
     app.run(host='127.0.0.1', port=5000)
