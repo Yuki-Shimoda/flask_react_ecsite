@@ -1,10 +1,7 @@
 from flask import Flask, render_template, request, redirect,jsonify,make_response, jsonify
 from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, date
-from sqlalchemy.sql.functions import user
 from werkzeug.security import generate_password_hash, check_password_hash
-import jwt
 from flask_cors import CORS
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import *
@@ -17,7 +14,7 @@ from sqlalchemy.orm import relationship
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:*******@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    
 app.config['JSON_AS_ASCII'] = False
 
@@ -28,7 +25,7 @@ def get_connection():
     port = '5432'
     users = 'postgres'
     dbnames = 'fr_ec'
-    passwords = 'postgres'
+    passwords = '******'
     return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
 
 class Item(db.Model):
@@ -105,10 +102,6 @@ def home():
                 dic_item[id]['price']=price_list[id_id]
                 dic_item[id]['image']=image_list[id_id]
                 id_id+=1
-    # dt_now=datetime.now()
-    # print('現在時間',dt_now)
-
-    # print(dic_item)
     return jsonify(dic_item)
 
 @app.route('/item_detail/<int:Id>', methods=['POST'])
@@ -117,43 +110,45 @@ def detail(Id):
         print('detail')
         # Cartテーブルにレコード追加
         print(request.get_json())        
-        data = request.get_json()
+        data = request.get_json() # {post_quantity:quantity,post_userId:uid}
         item_id = Id
-        # user_id= 1
         global user_id 
         user_id = data['post_userId']
-        # item_id = data['post_item']
-
         quantity= data['post_quantity']
-
-        # status = 0のitemを取ってくる
-        carts = db.session.query(Cart.item_id).filter(Cart.status == 0).all()
+        # cartテーブルに追加
+        # 現在カートに入っている商品のitem_idを取得
+        carts = db.session.query(Cart.item_id).filter(Cart.status == 0, Cart.user_id == user_id).all()
+        print(carts) # [(1,),(2,),(6,)]
         item_id_list = []
         for i_d in carts:
             item_id_list.append(i_d[0])
-
-        new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
-        if len(carts) == 0:
+        print(item_id_list) # [1,2,6]
+        # 既にカートに同じ商品が入っていた場合
+        if item_id in item_id_list:
+            print('重複商品アリのため個数をアップデート')
+            update_item = db.session.query(Cart).filter(Cart.item_id == item_id, Cart.status ==0).first()
+            print(update_item) # <Cart1>
+            print(update_item.quantity) # 数量変更する前の個数
+            before_quantity = update_item.quantity
+            update_item.quantity = int(before_quantity)+int(quantity)
+            print(update_item.quantity)
+            db.session.commit()
+            print('個数アップデート完了')
+        # 初めてカートに入れる商品の場合
+        else: 
+            print('カートに初追加')
+            new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
             db.session.add(new_orderItem)
             db.session.commit()
-            return redirect('/')
-        else:
-            if item_id in item_id_list:
-                db.session.query(Cart).filter(Cart.item_id == new_orderItem.item_id).update({'quantity': Cart.quantity + int(quantity)})
-                db.session.commit()
-                return redirect('/')
-            else:
-                db.session.add(new_orderItem)
-                db.session.commit()
-                return redirect('/')
+            print('DBにCart追加完了')
 
-        # user = 1
-        u_id = db.session.query(Order).filter(Order.user_id == str(user_id), Order.status ==0).all()
+        # ordersテーブルに追加
+        u_id = db.session.query(Order).filter(Order.user_id == user_id, Order.status ==0).all()
         if u_id:
             print('重複したuser_idにてstatus:0のレコードを発見')
             return redirect('/')
-        else:
-            new_record = Order(status=0, user_id=str(user_id))
+        else: # 重複がない場合
+            new_record = Order(status=0, user_id=user_id)
             db.session.add(new_record)
             db.session.commit()
 
@@ -172,6 +167,31 @@ def detail(Id):
         # リストに入っている分のidをforで回してCart_idとし、order_idはOrderのidとしてINSERT（add）を実行
 
 
+        # # すでに同じ商品がカートに入っていた場合、レコード追加ではなく個数のみ更新する処理
+        # # user_id = user_idかつstatus = 0のitemを取ってくる
+        # carts = db.session.query(Cart.item_id).filter(Cart.status == 0, Cart.user_id == user_id).all()
+        # print(carts)
+        # item_id_list = []
+        # for i_d in carts:
+        #     item_id_list.append(i_d[0])
+        # print(item_id_list)
+
+        # # new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
+        # if len(carts) == 0:
+        #     db.session.add(new_orderItem)
+        #     db.session.commit()
+        #     return redirect('/')
+        # else:
+        #     if item_id in item_id_list:
+        #         db.session.query(Cart).filter(Cart.item_id == new_orderItem.item_id).update({'quantity': Cart.quantity + int(quantity)})
+        #         db.session.commit()
+        #         return redirect('/')
+        #     else:
+        #         db.session.add(new_orderItem)
+        #         db.session.commit()
+        #         return redirect('/')
+
+
 def toDict(self):
     return{
             'id': self[0],
@@ -186,7 +206,6 @@ def toDict(self):
 
 @app.route('/cart', methods=['GET', 'POST'])
 def ordered():
-    # user = 1
     global user_id
     if request.method == 'GET':
         with get_connection() as conn:
@@ -201,8 +220,6 @@ def ordered():
             print('グローバルのuser_id：'+ user_id)
             return jsonify(l)
 
-    # user = 1
-    # user = 3
     if request.method == 'POST':
         data = request.get_json()
         print(data)
@@ -212,9 +229,7 @@ def ordered():
         destinationAddress = data['post_orderInfo']['destinationAddress']
         destinationTel = data['post_orderInfo']['destinationTel']
         user_id = data['post_orderInfo']['post_uid']
-        # order_id_tup = db.session.query(Order.id).filter(Order.user_id == str(user), Order.status == 0).first()
         order_id_tup = db.session.query(Order.id).filter(Order.user_id == user_id, Order.status == 0).first()
-        # cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == str(user), Cart.status ==0).all()
         cart_id_tup = db.session.query(Cart.id).filter(Cart.user_id == user_id, Cart.status ==0).all()
         order_id=order_id_tup[0]
         cart_ids=[]
@@ -226,15 +241,8 @@ def ordered():
             db.session.add(item)
         db.session.commit()
 
-        # order_record = db.session.query(Order).filter(Order.user_id ==str(user), Order.status ==0).all()
         order_record = db.session.query(Order).filter(Order.user_id == user_id, Order.status ==0).all()
         order_record = order_record[0]
-
-        # order_record.ordered_date = ordered_record
-
-    cart_records_list = db.session.query(Cart).filter(Cart.user_id == str(user), Cart.status==0).all()
-    for cart_records in cart_records_list:
-        cart_records.status = 1
         order_record.destination_name = destinationName
         order_record.destination_zipcode = destinationZipcode
         order_record.destination_address = destinationAddress
@@ -243,7 +251,6 @@ def ordered():
         db.session.commit()
         print('order情報追加・Orderのstatus変更完了')
 
-        # cart_records_list = db.session.query(Cart).filter(Cart.user_id == str(user), Cart.status==0).all()
         cart_records_list = db.session.query(Cart).filter(Cart.user_id == user_id, Cart.status==0).all()
         for cart_records in cart_records_list:
             cart_records.status = 1
@@ -265,6 +272,7 @@ def history_test():
     if request.method=='GET':
         print('histo')
         print(str(user_id))
+
 
         resdata={}
         item_id_list=[]
@@ -347,8 +355,6 @@ def login():
             redirect('/')
             return make_response('Password is incorrect', 400)
         else:
-            # exp = datetime.utcnow() + datetime.timedelta(hours=1)
-            # encoded = jwt
             userInfo['name']= user.user_name
             userInfo['id']=user.user_id
             print('合っています')
