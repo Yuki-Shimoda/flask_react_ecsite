@@ -127,10 +127,27 @@ def detail(Id):
         # item_id = data['post_item']
 
         quantity= data['post_quantity']
-        new_orderItem = Cart(status=0,quantity=quantity,item_id=item_id, user_id=user_id)
-        db.session.add(new_orderItem)
-        db.session.commit()
-        print('DBにCart追加完了')
+
+        # status = 0のitemを取ってくる
+        carts = db.session.query(Carts.item_id).filter(Carts.status == 0).all()
+        item_id_list = []
+        for i_d in carts:
+            item_id_list.append(i_d[0])
+
+        new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
+        if len(carts) == 0:
+            db.session.add(new_orderItem)
+            db.session.commit()
+            return redirect('/')
+        else:
+            if item_id in item_id_list:
+                db.session.query(Cart).filter(Cart.item_id == new_orderItem.item_id).update({'quantity': Cart.quantity + int(quantity)})
+                db.session.commit()
+                return redirect('/')
+            else:
+                db.session.add(new_orderItem)
+                db.session.commit()
+                return redirect('/')
 
         # user = 1
         u_id = db.session.query(Order).filter(Order.user_id == str(user_id), Order.status ==0).all()
@@ -163,7 +180,7 @@ def ordered():
     if request.method == 'GET':
         with get_connection() as conn:
             with conn.cursor() as cur:
-                sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0'
+                sql = 'SELECT cart.id, cart.quantity, item_table.id, item_table.name, item_table.price, item_table.image FROM cart JOIN item_table ON cart.item_id = item_table.id WHERE cart.status = 0 ORDER BY cart.id ASC'
                 cur.execute(sql)
                 result_list = cur.fetchall()
                 l = []
