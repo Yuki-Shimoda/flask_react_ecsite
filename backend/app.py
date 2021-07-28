@@ -8,25 +8,25 @@ from sqlalchemy import *
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import *
 from flask_cors import CORS
-import psycopg2
+# import psycopg2
 from sqlalchemy.orm import relationship
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
 db = SQLAlchemy(app)
 
-def get_connection():
-    localhost = 'localhost'
-    port = '5432'
-    users = 'postgres'
-    dbnames = 'fr_ec'
-    passwords = 'mwmw1225zwzw'
-    return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
+# def get_connection():
+#     localhost = 'localhost'
+#     port = '5432'
+#     users = 'postgres'
+#     dbnames = '****'
+#     passwords = '****'
+#     return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -208,17 +208,32 @@ def toDict(self):
 def ordered():
     global user_id
     if request.method == 'GET':
-        with get_connection() as conn:
-            with conn.cursor() as cur:
-                sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0 ORDER BY cart.id ASC'
-                cur.execute(sql)
-                result_list = cur.fetchall()
-                l = []
-                for item in result_list:
-                    c = toDict(item)
-                    l.append(c)
-            print('グローバルのuser_id：'+ user_id)
-            return jsonify(l)
+        print('ログイン中のユーザー：'+user_id)
+        result_lists = db.session.query(Cart.id, Cart.quantity, Item.id, Item.name, Item.price, Item.image)\
+            .filter(Cart.status ==0, Cart.user_id == user_id)\
+            .join(Item,Item.id == Cart.item_id).all()
+        print(result_lists)
+        order_his_li =[]
+        for his_item in result_lists:
+            his_dict = toDict(his_item)
+            order_his_li.append(his_dict)
+        return jsonify(order_his_li)
+
+        # with get_connection() as conn:
+        #     with conn.cursor() as cur:
+        #         sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0 ORDER BY cart.id ASC'
+        #         cur.execute(sql)
+        #         result_list = cur.fetchall()
+        #         print(result_list)
+        #         # [(13, 10, 1, 'タカアシガニ', 10000, '1.png'), (14, 4, 2, 'ズワイガニ', 6000, '2.png')]
+        #         l = []
+        #         for item in result_list:
+        #             c = toDict(item)
+        #             l.append(c)
+        #     print('グローバルのuser_id：'+ user_id)
+        #     print(l) 
+        #     # [{'id': 13, 'quantity': 10, 'item': {'item_id': 1, 'name': 'タカアシガニ', 'price': 10000, 'image': '1.png'}}, {'id': 14, 'quantity': 4, 'item': {'item_id': 2, 'name': 'ズワイガニ', 'price': 6000, 'image': '2.png'}}]
+        # return jsonify(l)
 
     if request.method == 'POST':
         data = request.get_json()
