@@ -11,9 +11,30 @@ import Paper from '@material-ui/core/Paper';
 import { Button } from '@material-ui/core';
 
 const Cart = () => {
+
+    // const history = useHistory()
+    // const handleLink = path => history.push(path)
+    // const [orderInfo,setOrder]=useState('')
+    // // const [orderedDate, setOrderedDate]=useState('')
+    // const [destinationName,setDesitinationName]=useState('')
+    // const [destinationZipcode,setDesitinationZipcode]=useState('')
+    // const [destinationAddress,setDesitinationAddress]=useState('')
+    // const [destinationTel,setDesitinationTel]=useState('')
+
+    // const orderComplete =(Info,Name,Zipcode,Address,Tel)=>{
+    //     Axios.post(`http://127.0.0.1:5000/cart`, {post_orderInfo:{info:Info, destinationName:Name,destinationZipcode:Zipcode, destinationAddress:Address, destinationTel:Tel}})
+    //     handleLink('/complete')
+    // }
+    
+    // const createInfo = e =>{
+    //     setOrder(e.target.value)
+    //     // console.log(orderInfo)
+    // }
+
     const [cart, setCart] = useState([]);
     const [flag, setFlag] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
+
 
     const createTotalPrice = () => {
         let total = 0;

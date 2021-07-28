@@ -1,6 +1,7 @@
 import {useHistory, BrowserRouter as Router} from 'react-router-dom'
 import Axios from 'axios';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -26,11 +27,22 @@ const Header =() => {
   const history = useHistory();
   const handleLink = path => history.push(path);
 
+  const [userName, setUserName] = useState('')
+
+  useEffect(()=>{
+    console.log('ヘッダーのuseEffect発動')
+    Axios.get('http://127.0.0.1:5000/login')
+    .then(function(res){
+      const firstDbData = res.data
+      console.log(firstDbData)
+      setUserName(firstDbData)
+    })
+  },[userName])
 
   const toOrderHistory = ()=>{
     Axios.get('http://127.0.0.1:5000/order_history')
     .then(function(res){
-        console.log(res)
+        // console.log(res)
     })
     handleLink('/order_history')
 }
@@ -51,12 +63,13 @@ const Header =() => {
             <Button onClick={() => handleLink('/cart')}>カート</Button>
             <Button onClick={() => handleLink('/item_detail')}>商品詳細</Button>
             <Button onClick={() => toOrderHistory()}>注文履歴</Button>
-            {/* <button onClick={() => handleLink('/order_history')}>履歴</button> */}
+            <p>{userName}</p>
             <Button onClick={() => handleLink('/complete')}>完了画面</Button>
             <Button onClick={()=>handleLink('/')}>トップへ戻る</Button>
             </Router>
-        </React.Fragment>
+          </React.Fragment>      
           <Button color="inherit">Login</Button>
+          <Button color="inherit" onClick={()=>handleLink('/signup')}>新規登録</Button>
         </Toolbar>
       </AppBar>
     </div>

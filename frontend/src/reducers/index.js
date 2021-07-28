@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux'
 // import user from './user'
 import item from './item'
-// import cart from './cart'
+import ordered from './cart'
 
 
-export default combineReducers({item})
+export default combineReducers({item, ordered})

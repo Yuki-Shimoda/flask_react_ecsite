@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+// import {BrowserRouter as Router,useHistory,} from 'react-router-dom';
+// import Axios from 'axios'; actionsで実行
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { setItem, deleteItem } from "../actions/index";
+import { setItem} from "../actions/index";
 import { Button } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -14,39 +16,42 @@ import TextField from "@material-ui/core/TextField";
 import SortIcon from "@material-ui/icons/Sort";
 
 const useStyles = makeStyles({
-  root: {
-    maxWidth: 345,
-  },
-  media: {
-    height: 220,
-  },
-  cardList: {
-    display: "flex",
-    flexWrap: "wrap",
-    listStyleType: "none",
-    boxSizing: "borderBox",
-  },
-  card: {
-    width: "25%",
-    marginTop: "30px",
-    fontSize: "2px",
-  },
-  input: {
-    margin: "30px 5px 0 0",
-  },
-  buttonSearch: {
-    margin: "45px 5px 0 0",
-  },
-  buttonClear: {
-    margin: "45px 5px 0 0",
-  },
-});
+    root: {
+      maxWidth: 345,
+    },
+    media: {
+      height: 220,
+    },
+    cardList: {
+      display: "flex",
+      flexWrap: "wrap",
+      listStyleType: "none",
+      boxSizing: "borderBox",
+    },
+    card: {
+      width: "25%",
+      marginTop: "30px",
+      fontSize: "2px",
+    },
+    input: {
+      margin: "30px 5px 0 0",
+    },
+    buttonSearch: {
+      margin: "45px 5px 0 0",
+    },
+    buttonClear: {
+      margin: "45px 5px 0 0",
+    },
+  });
+
+// const itemsSelector = (state) => state.item.items;
 
 const Home = () => {
   const classes = useStyles();
 　//stateの中のitems情報[]を取得し、セレクターで使用。itemsをarrayにセット 　
-  const itemsSelector = (state) => state.item.items;
-  const items = useSelector(itemsSelector);
+  // const items = useSelector(itemsSelector);
+  const selector = useSelector(state => state)
+  let items = selector.item.items
   const [array, setArray] = useState(items);
   console.log(items)
   const [mozi, setMozi] = useState("");
@@ -56,9 +61,6 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(setItem());
-    return () => {
-      dispatch(deleteItem());
-    };
   }, [dispatch]);
 
   useEffect(() => {
@@ -199,8 +201,49 @@ const Home = () => {
       </ol>
     </div>
   );
-};
+    // const history = useHistory();
+    // const handleLink = path => history.push(path);
+
+    // const [itemList, setItems] = useState([])
+
+    // useEffect(()=>{
+    //     console.log('useEffect発動')
+    //     Axios.get('http://127.0.0.1:5000/')
+    //     .then(function(res){
+    //         const firstDbData = res.data
+    //         const ItemArray = firstDbData
+    //         setItems(ItemArray)
+    //     })
+    // },[])
+
+    // const id_list=[]
+    // for (const id in itemList){
+    //     id_list.push(Number(id))
+    // }
+
+    // return (
+    //     <>
+    //         <Router>
+    //             <div>Home</div>
+    //                 <ul>
+    //                 {id_list.map((id,key)=>{
+    //                         return(
+    //                             <li key={key}>
+    //                                 <p>商品ID:{id}</p>
+    //                                 <p>商品名：{itemList[id].name}</p>
+    //                                 <p>価格：{itemList[id].price}円</p>
+    //                                 {/* <p>画像パス：{itemList[id].image}</p> */}
+    //                                 <img src={`${process.env.PUBLIC_URL}/static/images/${itemList[id].image}`} width="20%"></img>
+    //                                 <button onClick={()=>handleLink(`/item_detail/${id}`)}>商品詳細</button>
+    //                             </li>
+    //                         )
+    //                     })}
+    //                 </ul>
+    //         </Router> 
+    //     </>
+
+    // )
+}
 
 export default Home;
 
-{/* <p>画像パス：{itemList[id].image}</p> */}

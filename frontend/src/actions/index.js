@@ -1,7 +1,6 @@
 // import {CART_STATUS_IN} from './status'
 import Axios from 'axios';
 
-
 //初期表示商品情報
 export const SETITEM = 'setItem'
 export const setItem = () => dispatch => {
@@ -18,6 +17,30 @@ export const DELETEITEM = 'deleteItem'
 export const deleteItem = () => ({
   type:DELETEITEM
 })
+
+//注文済商品情報
+export const ORDERED = 'ordered'
+export const ordered = (id,quantity) => dispatch => {
+  Axios.get('http://127.0.0.1:5000/order_history/')
+  .then(function(res) {
+      console.log(res.data) //{{3: {…}, 4: {…}, 5: {…}}} 
+      const data = Object.values(res.data) //[{…}, {…}, {…}]
+      return dispatch({
+        type:ORDERED,
+        orderData:data
+      })
+  })
+}
+
+//注文済商品キャンセル
+export const ORDERCANCEL = 'orderCancel'
+export const orderCancel = (id) => dispatch => {
+  Axios.post(`http://127.0.0.1:5000/order_history/${id}`)
+  // return dispatch({
+  //   type:ORDERED,
+  // })
+  return ('OK')
+}
 
 // カートに商品を追加
 // 指定ユーザーのカートテーブルstatus0のものをDBから取得
@@ -191,12 +214,3 @@ export const deleteItem = () => ({
 //   type:USERINFORESET
 // })
 
-// export const ORDERCANCEL = 'orderCancel'
-// export const orderCancel = (user,orderInfo) => dispatch => {
-//   firebase.firestore().collection(`users/${user.uid}/orders`).doc(orderInfo.orderId).update(orderInfo).then(() => {
-//     return dispatch ({
-//       type:ORDERCANCEL,
-//       orderInfo:orderInfo
-//     })
-//   })
-// }
