@@ -12,6 +12,7 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 
 import { deleteUserInfo } from "../actions/index";
+import { ButtonGroup } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,34 +25,40 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
 }));
-// const userSelector = state=> state.userIdState.loginuser;
-const userSelector = state=> state.userIdState;
 
 
-const Header =() => {
+const Header =(props) => {
   const classes = useStyles();
   const history = useHistory();
   const handleLink = path => history.push(path);
   const dispatch = useDispatch()
 
-  const [userName, setUserName] = useState('')
+  console.log(props.login_user)
 
-  const userIdState = useSelector(userSelector)
-    
-  useEffect(()=>{
-    console.log('ヘッダーのuseEffect発動')
-    // if(userIdState.loginUser){　// ログインしていたら
-    //   setUserName(loginUser.name)
-    //   console.log('ログイン成功')
-    // }else{
-    //   console.log('未ログイン')
-    // }
-  },[])
+  // const [userName, setUserName] = useState('')
+
+  // const userIdState = useSelector(userSelector)
+  
+
+  // useEffect(()=>{
+  //   console.log('ヘッダーのuseEffect発動！')
+  //   let headerName=userIdState.name
+  //   console.log(userIdState)
+  //   setUserName(headerName)
+  // },[])
+
+  
+  // useEffect(()=>{
+  //   console.log('ヘッダーのuseEffect発動')
+  //   let headerName=userIdState.name
+  //   console.log(userIdState)
+  //   setUserName(headerName)
+  // },[userIdState])
 
   const toOrderHistory = ()=>{
     Axios.get('http://127.0.0.1:5000/order_history')
     .then(function(res){
-        // console.log(res)
+        console.log(res)
     })
     handleLink('/order_history')
 }
@@ -59,11 +66,36 @@ const Header =() => {
     console.log('ログアウトします')
     console.log('DELETE_USER_INFO発動')
     dispatch(deleteUserInfo())
-    console.log(userIdState)
+    // console.log(userIdState)
     localStorage.removeItem('uid');
     localStorage.removeItem('password');
     console.log('ローカルストレージからユーザー情報削除完了')
+    handleLink('/')
   }
+
+  const LoginOrLogout = (props) => {
+    // if(props.user !==undefined){
+      if (props.userInfo.login_user === true ) {
+        return(
+          <>
+            <Button color="inherit" onClick={() => handleLink('/cart')}>カート</Button>
+            <Button color="inherit" onClick={() => toOrderHistory()}>注文履歴</Button>
+            <p>{props.userInfo.name}</p>
+            <Button color="inherit" onClick={logout}>ログアウト</Button>
+          </>
+        )
+      }else {
+        return (
+          <>
+          <Button color="inherit" onClick={()=>handleLink('/login')}>ログイン</Button>
+          <Button color="inherit" onClick={()=>handleLink('/signup')}>新規登録</Button>
+          </>
+        )
+      }
+    // }
+    
+  }  
+
 
   return (
     <div className={classes.root}>
@@ -78,19 +110,19 @@ const Header =() => {
           <React.Fragment>
             <Router>
             <Button onClick={() => handleLink('/')}>Home</Button>
-            <Button onClick={() => handleLink('/cart')}>カート</Button>
-            <Button onClick={() => handleLink('/item_detail')}>商品詳細</Button>
-            <Button onClick={() => toOrderHistory()}>注文履歴</Button>
+            {/* <Button onClick={() => handleLink('/cart')}>カート</Button> */}
+            {/* <Button onClick={() => handleLink('/item_detail')}>商品詳細</Button> */}
+            {/* <Button onClick={() => toOrderHistory()}>注文履歴</Button> */}
             
-            <Button onClick={() => handleLink('/complete')}>完了画面</Button>
-            <Button onClick={()=>handleLink('/')}>トップへ戻る</Button>
+            {/* <Button onClick={() => handleLink('/complete')}>完了画面</Button> */}
+            {/* <Button onClick={()=>handleLink('/')}>トップへ戻る</Button> */}
             </Router>
           </React.Fragment>
-          {/* <p>{loginUser}</p> */}
-          <p>{userName}</p>
-          <Button color="inherit" onClick={()=>handleLink('/login')}>Login</Button>
-          <Button color="inherit" onClick={logout}>Logout</Button>
-          <Button color="inherit" onClick={()=>handleLink('/signup')}>新規登録</Button>
+          {/* <p>{userName}</p> */}
+          <LoginOrLogout userInfo={props.login_user}/>
+          <Button onClick={()=>handleLink('/login')}>Login</Button>
+          <Button onClick={logout}>Logout</Button>
+          <Button onClick={()=>handleLink('/signup')}>新規登録</Button>
         </Toolbar>
       </AppBar>
     </div>
