@@ -14,7 +14,7 @@ from sqlalchemy.orm import relationship
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:*****@localhost:5432/***'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
@@ -387,6 +387,7 @@ def logout():
     # ログアウトされたらグローバル変数のuser_idのユーザー情報を削除
     global user_id
     user_id = ''
+    redirect('/')
     return 'グローバルのuser_id削除'
 if __name__ == "__main__":
     app.debug = True

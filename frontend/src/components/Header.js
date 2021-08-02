@@ -1,4 +1,4 @@
-import {useHistory, BrowserRouter as Router} from 'react-router-dom'
+import {useHistory, BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
 import Axios from 'axios';
 import React, {useEffect, useState} from 'react';
 import {useSelector, useDispatch} from "react-redux";
@@ -34,26 +34,6 @@ const Header =(props) => {
   const dispatch = useDispatch()
 
   console.log(props.login_user)
-
-  // const [userName, setUserName] = useState('')
-
-  // const userIdState = useSelector(userSelector)
-  
-
-  // useEffect(()=>{
-  //   console.log('ヘッダーのuseEffect発動！')
-  //   let headerName=userIdState.name
-  //   console.log(userIdState)
-  //   setUserName(headerName)
-  // },[])
-
-  
-  // useEffect(()=>{
-  //   console.log('ヘッダーのuseEffect発動')
-  //   let headerName=userIdState.name
-  //   console.log(userIdState)
-  //   setUserName(headerName)
-  // },[userIdState])
 
   const toOrderHistory = ()=>{
     Axios.get('http://127.0.0.1:5000/order_history')
@@ -109,20 +89,14 @@ const Header =(props) => {
           </Typography>
           <React.Fragment>
             <Router>
-            <Button onClick={() => handleLink('/')}>Home</Button>
-            {/* <Button onClick={() => handleLink('/cart')}>カート</Button> */}
-            {/* <Button onClick={() => handleLink('/item_detail')}>商品詳細</Button> */}
-            {/* <Button onClick={() => toOrderHistory()}>注文履歴</Button> */}
-            
-            {/* <Button onClick={() => handleLink('/complete')}>完了画面</Button> */}
-            {/* <Button onClick={()=>handleLink('/')}>トップへ戻る</Button> */}
+              <Button onClick={() => handleLink('/')}>Home</Button>
             </Router>
           </React.Fragment>
           {/* <p>{userName}</p> */}
           <LoginOrLogout userInfo={props.login_user}/>
-          <Button onClick={()=>handleLink('/login')}>Login</Button>
+          {/* <Button onClick={()=>handleLink('/login')}>Login</Button>
           <Button onClick={logout}>Logout</Button>
-          <Button onClick={()=>handleLink('/signup')}>新規登録</Button>
+          <Button onClick={()=>handleLink('/signup')}>新規登録</Button> */}
         </Toolbar>
       </AppBar>
     </div>
