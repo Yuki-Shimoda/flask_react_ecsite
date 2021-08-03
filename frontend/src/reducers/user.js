@@ -1,8 +1,8 @@
 import { SET_USER_INFO, DELETE_USER_INFO } from '../actions/index'
 
 const initialState = {
-  uid: 'iuy',
-  name: 'namae',
+  uid: '',
+  name: '',
   login_user: false
 }
 

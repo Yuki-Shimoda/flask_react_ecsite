@@ -1,7 +1,6 @@
 import React,{useEffect, useState} from 'react';
 import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom'
 import Header from './Header'
-import Footer from './Footer'
 import Home from './Home'
 import ItemDetail from './ItemDetail.js'
 import Cart from './Cart'
@@ -16,6 +15,7 @@ import { login } from "../actions/index";
 const getState = state => state.userIdState; // userIdState uid,name,login_user
 
 const App=()=> {
+  console.log('App.js発動')
   // const userIdState = useSelector((state) => state.userIdState)
   const stateContent = useSelector(getState);
   const login_user = stateContent
@@ -73,9 +73,6 @@ const App=()=> {
         </Switch>
          }
 
-
-
-        <Footer />
       </Router>
         
     </React.Fragment>
