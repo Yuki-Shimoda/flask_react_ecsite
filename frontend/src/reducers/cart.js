@@ -1,7 +1,7 @@
 import {ORDERED, ORDERCANCEL, SETCART, DELETECART} from '../actions/index'
 
 const initialState = {
-  cart:'',
+  cart:[],
   orders:[],
   login_user:false
 }
@@ -30,7 +30,7 @@ export default (state = initialState, action) => {
       }
       case DELETECART:
         console.log('deleteCart発動')
-        console.log(action.cart)
+        console.log(action.cart)  
       return {  
         cart: action.cart,
         orders:[],

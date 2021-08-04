@@ -75,10 +75,9 @@ const ItemDetail = () => {
             console.log(`ログインの有無:　${userIdState.login_user}`)
             console.log(`ログインuid：　${userIdState.uid}`)
             const uid =userIdState.uid
-            Axios.post(`http://127.0.0.1:5000/item_detail/${detailId}`, {post_quantity:quantity, post_userId:uid})
+            Axios.post(`http://127.0.0.1:5000/item_detail/${detailId}`, {post_quantity:quantity, post_userId:uid}).then(()=> dispatch(setCart()))
           } 
         else { console.log('userきてない')}
-        dispatch(setCart())
         handleLink('/cart')
     }
 
