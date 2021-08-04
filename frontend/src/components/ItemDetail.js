@@ -64,27 +64,7 @@ const ItemDetail = () => {
         else { console.log('userきてない')}
         handleLink('/cart')
     }
-// const createCount = e =>{
-//     const newCount = e.target.value
-//     setCount(newCount)
-// }
-//     return (
-//         <>
-//         <div>ItemDetail：{detailId}</div>
-//         <form action="/item_detail/{{ detailId }}" method="POST">
-//             <label id="itemCount">数量を選択してください</label>
-//             <select name="itemCount" onChange={createCount}>
-//                 <option value="1" name="1">1</option>
-//                 <option value="2" name="2">2</option>
-//                 <option value="3" name="3">3</option>
-//                 <option value="4" name="4">4</option>
-//                 <option value="5" name="5">5</option>
-//             </select>
-//             <button onClick={()=>addCart(detailId,itemCount)}>カートへ追加</button>
-//         </form>
-//         </>
-//     )
-// }
+
 return (
     <React.Fragment>
       <h1 align="center">商品詳細</h1>
