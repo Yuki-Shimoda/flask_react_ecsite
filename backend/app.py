@@ -5,7 +5,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import *
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import *
 from flask_cors import CORS
 # import psycopg2
@@ -14,7 +13,7 @@ from sqlalchemy.orm import relationship
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
@@ -204,7 +203,7 @@ def toDict(self):
             }
     }
 
-@app.route('/cart', methods=['GET', 'POST'])
+@app.route('/cart/', methods=['GET', 'POST'])
 def ordered():
     global user_id
     if request.method == 'GET':
@@ -276,10 +275,12 @@ def ordered():
 
 @app.route('/delete_cartitem/<int:deleteId>', methods=['POST'])
 def deleteCartItem(deleteId):
-    status_update = db.session.query(Cart).filter(Cart.id == deleteId).first()
-    status_update.status = 9
-    db.session.commit()
-    return redirect('/')
+    global user_id
+    if request.method=='POST':
+        status_update = db.session.query(Cart).filter(Cart.id == deleteId).first()
+        status_update.status = 9
+        db.session.commit()
+        return redirect('/cart/')
 
 @app.route('/order_history/', methods=['GET'])
 def history_test():
@@ -287,8 +288,6 @@ def history_test():
     if request.method=='GET':
         print('histo')
         print(str(user_id))
-
-
         resdata={}
         item_id_list=[]
         quantity_list=[]
@@ -339,8 +338,6 @@ def order_cancel(id):
         status_update.status = 9
         db.session.commit()
         return redirect('/')
-
-
 
 @app.route('/signup',methods=['POST'])
 def signup():

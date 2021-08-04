@@ -11,11 +11,12 @@ const userIdState = (state = initialState, action) => {
     case SET_USER_INFO:
       console.log('SET_USER_INFOが発火')
       console.log('ユーザー情報をStateに保存')
+      console.log(action)
       return{
         ...state,
         uid:action.uid,
         name:action.name,
-        login_user:action.login_user
+        login_user:true
       }
       // state.uid = action.uid;
       // state.login_user = action.login_user;
@@ -34,7 +35,7 @@ const userIdState = (state = initialState, action) => {
         ...state,
         uid:action.uid,
         name:action.name,
-        login_user:action.login_user
+        login_user:false
       };
     default:
       return state
