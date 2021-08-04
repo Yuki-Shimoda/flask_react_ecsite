@@ -9,6 +9,8 @@ from sqlalchemy.orm import *
 from flask_cors import CORS
 # import psycopg2
 from sqlalchemy.orm import relationship
+import datetime
+
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -261,6 +263,7 @@ def ordered():
         order_record.destination_zipcode = destinationZipcode
         order_record.destination_address = destinationAddress
         order_record.destination_tel = destinationTel
+        order_record.ordered_date = datetime.date.today() 
         order_record.status = 1
         db.session.commit()
         print('order情報追加・Orderのstatus変更完了')
@@ -288,23 +291,26 @@ def history_test():
     if request.method=='GET':
         print('histo')
         print(str(user_id))
+
         resdata={}
         item_id_list=[]
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
         status_list=[]
-        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status)\
+        ordered_date_list=[]
+        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status, Order.ordered_date)\
             .filter(Cart.user_id == user_id)\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
             .all()  
-        print(order_lists)
+        # print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
             status_list.append(order_list[4])
+            ordered_date_list.append(order_list[5])
         # print(item_id_list)
         # print(quantity_list)
         # print('↓order_id_list')
@@ -320,12 +326,13 @@ def history_test():
                 resdata[order_id]['status']= status_list[id_id]
                 resdata[order_id]['item_list']= []
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
+                resdata[order_id]['ordered_date'] = ordered_date_list[id_id]
                 id_id+=1
             else:
                 #既にresdata[order_id]が存在している場合（1注文で複数種類の商品を購入した場合）
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
                 id_id+=1
-        # print(resdata)
+        print(resdata)
         print('orderHistory')
         redirect('/')
         return jsonify(resdata)
