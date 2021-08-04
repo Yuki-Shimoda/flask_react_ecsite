@@ -60,7 +60,6 @@ const Home = () => {
     dispatch(setItem());
   }, [dispatch]);
 
-
   useEffect(() => {
     setArray(items);
   }, [items]);

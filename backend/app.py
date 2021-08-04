@@ -15,7 +15,7 @@ import datetime
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:*******@localhost:5432/****'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 

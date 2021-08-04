@@ -16,8 +16,16 @@ const Cart = () => {
     const dispatch = useDispatch();
     const selector = useSelector(state => state);
     console.log(selector)
-    const carts = selector.setCart.cart
+
+    const carts = selector.setCart.cart // APIで取得したカート情報
+
+    // const items = selector.item.items
+    console.log('cartsにセット')
     console.log(carts)
+
+    // const [cartItem, setCartItem] = useState(carts);
+    // const [array, setArray] = useState(items);
+
     const [flag, setFlag] = useState(false);
     // const [totalPrice, setTotalPrice] = useState(0);
 
@@ -32,8 +40,8 @@ const Cart = () => {
 
     useEffect(() => {
         dispatch(setCart())
-    }, []);
-
+        console.log('セットカート！')
+    },[]);
 
     const deleteCartItem = (deleteId) => {
         console.log(deleteId)
@@ -87,7 +95,7 @@ const Cart = () => {
                         </Table>
                     </TableContainer>
             }
-            <p>{createTotalPrice()}</p>
+            <p>{ createTotalPrice() }</p>
             {
                 carts.length === 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
             }
