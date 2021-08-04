@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 // import Axios from 'axios'; actionsで実行
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { setItem} from "../actions/index";
+import { setItem, setCart} from "../actions/index";
 import { Button } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -48,19 +48,20 @@ const useStyles = makeStyles({
 
 const Home = () => {
   const classes = useStyles();
-　//stateの中のitems情報[]を取得し、セレクターで使用。itemsをarrayにセット 　
-  // const items = useSelector(itemsSelector);
+  const dispatch = useDispatch();
   const selector = useSelector(state => state)
   let items = selector.item.items
   const [array, setArray] = useState(items);
-  console.log(items)
   const [mozi, setMozi] = useState("");
   const [resultState, setResultState] = useState(false);
   const [karamozi, setKaramozi] = useState(false);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(setItem());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(setCart());
   }, [dispatch]);
 
   useEffect(() => {

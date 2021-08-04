@@ -5,28 +5,35 @@ import {Box, TextField, Button, Grid} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from "react-redux";
 import { setItem, ordered, orderCancel, setCart,} from "../actions/index";
+
 const useStyles = makeStyles({
     grid: {
       margin: "50px 50px 100px 50px",
       width: "200"
     },
+  
     form: {
       margin: "20px 0 0 0",
       width: "60%"
     }
   });
+
 const userSelector = state => state.userIdState
+
 const ItemDetail = () => {
   const classes = useStyles();
   const params = useParams();
   const detailId = params.Id;
   const dispatch = useDispatch();
+  
   const history = useHistory();
   const handleLink = path => history.push(path);
+
   const selector = useSelector(state => state);
   const items = selector.item.items;
   const [selectItem, setSelectItem] = useState([]);
   const userIdState = useSelector(userSelector);
+
   useEffect(() => {
     const fetchItem = () =>
       {
@@ -38,20 +45,29 @@ const ItemDetail = () => {
       }
     fetchItem();
   },[dispatch])
+
   useEffect(() => {
     dispatch(setItem());
-  }, [dispatch]);
+  }, []);
+
+  // useEffect(() => {
+  //   dispatch(setCart());
+  // }, []);
+
+
   //個数
   const [buyNum,setNum] = useState(1)
-  const handleChangebuyNum = (e) =>
+  const handleChangebuyNum = (e) => 
     {
       setNum(e.target.value)
     }
   const quantity = Number(buyNum)
+
   //合計金額
   let addPrice = selectItem.price
     addPrice = selectItem.price * quantity
-  const addCart = () =>
+
+  const addCart = () => 
     {
       console.log(detailId)
         if (userIdState.login_user)
@@ -60,8 +76,9 @@ const ItemDetail = () => {
             console.log(`ログインuid：　${userIdState.uid}`)
             const uid =userIdState.uid
             Axios.post(`http://127.0.0.1:5000/item_detail/${detailId}`, {post_quantity:quantity, post_userId:uid})
-          }
+          } 
         else { console.log('userきてない')}
+        dispatch(setCart())
         handleLink('/cart')
     }
 
@@ -102,4 +119,5 @@ return (
     </React.Fragment>
   )
 }
+
 export default ItemDetail;

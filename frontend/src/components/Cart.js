@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// import {useSelector, useDispatch} from "react-redux";
+import {useSelector, useDispatch} from "react-redux";
 import axios from 'axios';
 import Form from './Form';
 import Table from '@material-ui/core/Table';
@@ -10,11 +10,21 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { Button } from '@material-ui/core';
-
+import { setCart, deleteCart, setItem } from '../actions';
 
 
 const Cart = () => {
-
+    const dispatch = useDispatch();
+    const selector = useSelector(state => state);
+    console.log(selector)
+    const carts = selector.setCart.cart
+    const items = selector.item.items
+    console.log(carts)
+    // const [cartItem, setCartItem] = useState(carts);
+    const [array, setArray] = useState(items);
+    // setCartItem(carts)
+    // console.log(carts)
+    // setCartItem(carts)
     // const history = useHistory()
     // const handleLink = path => history.push(path)
     // const [orderInfo,setOrder]=useState('')
@@ -34,47 +44,63 @@ const Cart = () => {
     //     // console.log(orderInfo)
     // }
 
-    const [cart, setCart] = useState([]);
+    // const [cart, setCart] = useState([]);
     const [flag, setFlag] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
 
     
-
     const createTotalPrice = () => {
         let total = 0;
-        cart.forEach(item => {
+        carts.forEach(item => {
             total = total + item.quantity * item.item.price
         })
         setTotalPrice(total); 
     }
+    useEffect(() => {
+        dispatch(setItem());
+      }, [dispatch]);
 
     useEffect(() => {
-        const fetchCart = async () => {
-            const result = await axios(`http://127.0.0.1:5000/cart`);
-            setCart(result.data);
-        };
-        fetchCart();
+        dispatch(setCart())
     }, []);
+
+    useEffect(() => {
+        setArray(items);
+      }, [dispatch]);
+
+    //   useEffect(() => {
+    //     setCartItem(carts);
+    //   }, []);
+
+    // useEffect(() => {
+    //     dispatch(setCart())
+    //     setCartItem(carts)
+    //     // console.log(carts)
+    //     // console.log(cartItem)
+    // },[])
+    // useEffect(() => {
+    //     const fetchCart = async () => {
+    //         const result = await axios(`http://127.0.0.1:5000/cart`);
+    //         setCart(result.data);
+    //     };
+    //     fetchCart();
+    // }, []);
 
     useEffect(() => {
         createTotalPrice();
     })
 
     const deleteCartItem = (deleteId) => {
-        axios.post(`http://127.0.0.1:5000/delete_cartitem/${deleteId}`);
-        const fetchCart = async () => {
-            const result = await axios(`http://127.0.0.1:5000/cart`)
-            setCart(result.data);
-        };
-        fetchCart();
+        console.log(deleteId)
+        dispatch(deleteCart(deleteId))
         console.log('カートからitemを削除');
     }
 
     return (
         <React.Fragment>
-
+            
             {
-                cart.length === 0 ? <p>カートに商品はありません</p> :
+                carts.length === 0 ? <p>カートに商品はありません</p> :
                     <TableContainer component={Paper}>
                         <Table>
                             <TableHead>
@@ -88,11 +114,11 @@ const Cart = () => {
                             </TableHead>
                             <TableBody>
                                 {
-                                    cart.map(item => {
+                                    carts.map(item => {
                                         return (
                                             <TableRow key={item.id}>
                                                 <TableCell component="th" scope="row">
-                                                    <img src={`${process.env.PUBLIC_URL}/static/images/${item.item.image}`} width="5%"></img>
+                                                    <img src={`${process.env.PUBLIC_URL}/static/images/${item.item.image}`}　 alt="画像" width="5%"></img>
                                                 </TableCell>
                                                 <TableCell align="right">{item.item.name}</TableCell>
                                                 <TableCell align="right">{item.quantity}</TableCell>
@@ -118,7 +144,7 @@ const Cart = () => {
             }
             <p>{totalPrice}</p>
             {
-                cart.length === 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
+                carts.length === 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
             }
             {
                 flag === false ? <></> :<Form />

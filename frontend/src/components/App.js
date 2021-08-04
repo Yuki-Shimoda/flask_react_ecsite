@@ -10,49 +10,54 @@ import Login from './Login';
 import Signup from './Signup';
 import Error from './Error';
 import { useSelector, useDispatch } from "react-redux";
-import { login } from "../actions/index";
+import { login, setCart } from "../actions/index";
 
 const getState = state => state.userIdState; // userIdState uid,name,login_user
 
 const App=()=> {
   console.log('App.js発動')
-  // const userIdState = useSelector((state) => state.userIdState)
-  const stateContent = useSelector(getState);
-  const login_user = stateContent
-
+  const userIdState = useSelector((state) => state.userIdState)
+  // const stateContent = useSelector(getState);
   const [loginUser, setLoginUser] = useState(false);
-
-  useEffect(()=>{
-    setLoginUser(stateContent.login_user);
-  },[stateContent])
-
-  console.log(login_user)
-  // const [loginUser, setLoginUser] = useState(false);
   const dispatch = useDispatch();
   let current_uid = localStorage.getItem('uid')
   let current_password = localStorage.getItem('password')
 
-  useEffect(()=>{
-    console.log('App.jsのuseEffect発動')
-    console.log('ローカルストレージのuidを取得：'+ current_uid)
-    if(current_uid){
-      dispatch(login(current_uid,current_password))
-      console.log(stateContent)
-      console.log(`ログイン中のユーザーは${current_uid}`)
-    }else{
-      console.log('誰もログインしていません')
-      console.log(stateContent)
-    }
-  },[])
 
-  console.log(loginUser)
+  //初期画面でstrageにデータがあればそのデータをdispatchし認証させる
+  //認証OKだったら一致したidとpassをDBから取得しSET_USER_INFOにdispatch
+  //user.jsでstateを書き換える　OK
+  useEffect(()=>{
+     const fetchUser = () =>  {
+      if(current_uid){
+        dispatch(login(current_uid,current_password))
+        dispatch(setCart())
+        console.log(userIdState)
+        console.log(`ログイン中のユーザーは${current_uid}`)
+      }else{
+        console.log('誰もログインしていません')
+      }
+    }
+    fetchUser();
+  },[])
+    // console.log('App.jsのuseEffect発動')
+    // // console.log(current_uid)
+    // if(current_uid){
+    //   dispatch(login(current_uid,current_password))
+    //   console.log(userIdState)
+    //   console.log(`ログイン中のユーザーは${current_uid}`)
+    // }else{
+    //   console.log('誰もログインしていません')
+
+
+  // console.log(loginUser)
 
 
   return (
     <React.Fragment>
       <Router>
-        <Header login_user={login_user} />
-        { loginUser ?
+        <Header login_user={userIdState} />
+        { userIdState.login_user ?
         // ログイン時のルーティング
         <Switch> 
           <Route path='/item_detail/:Id' component={ItemDetail}></Route>
@@ -62,7 +67,7 @@ const App=()=> {
           <Route path='/' exact component={Home}></Route>
           <Route component={Error}></Route>
         </Switch>
-        :
+        : 
         // ログアウト時のルーティング
         <Switch>
           <Route path='/item_detail/:Id' component={ItemDetail}></Route>
@@ -71,7 +76,7 @@ const App=()=> {
           <Route path='/' exact component={Home}></Route>
           <Route component={Error}></Route>
         </Switch>
-         }
+        }
 
       </Router>
         
