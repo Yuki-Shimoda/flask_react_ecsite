@@ -1,7 +1,7 @@
 import {ORDERED, ORDERCANCEL, SETCART, DELETECART} from '../actions/index'
 
 const initialState = {
-  cart:'',
+  cart:[],
   orders:[],
   login_user:false
 }

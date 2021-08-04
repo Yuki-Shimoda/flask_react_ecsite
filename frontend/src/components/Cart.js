@@ -17,34 +17,15 @@ const Cart = () => {
     const dispatch = useDispatch();
     const selector = useSelector(state => state);
     console.log(selector)
-    const carts = selector.setCart.cart
-    const items = selector.item.items
+    const carts = selector.setCart.cart // APIで取得したカート情報
+
+    // const items = selector.item.items
+    console.log('cartsにセット')
     console.log(carts)
+
     // const [cartItem, setCartItem] = useState(carts);
-    const [array, setArray] = useState(items);
-    // setCartItem(carts)
-    // console.log(carts)
-    // setCartItem(carts)
-    // const history = useHistory()
-    // const handleLink = path => history.push(path)
-    // const [orderInfo,setOrder]=useState('')
-    // // const [orderedDate, setOrderedDate]=useState('')
-    // const [destinationName,setDesitinationName]=useState('')
-    // const [destinationZipcode,setDesitinationZipcode]=useState('')
-    // const [destinationAddress,setDesitinationAddress]=useState('')
-    // const [destinationTel,setDesitinationTel]=useState('')
+    // const [array, setArray] = useState(items);
 
-    // const orderComplete =(Info,Name,Zipcode,Address,Tel)=>{
-    //     Axios.post(`http://127.0.0.1:5000/cart`, {post_orderInfo:{info:Info, destinationName:Name,destinationZipcode:Zipcode, destinationAddress:Address, destinationTel:Tel}})
-    //     handleLink('/complete')
-    // }
-    
-    // const createInfo = e =>{
-    //     setOrder(e.target.value)
-    //     // console.log(orderInfo)
-    // }
-
-    // const [cart, setCart] = useState([]);
     const [flag, setFlag] = useState(false);
     const [totalPrice, setTotalPrice] = useState(0);
 
@@ -54,19 +35,22 @@ const Cart = () => {
         carts.forEach(item => {
             total = total + item.quantity * item.item.price
         })
-        setTotalPrice(total); 
+        return total; 
     }
-    useEffect(() => {
-        dispatch(setItem());
-      }, [dispatch]);
+    // useEffect(() => {
+    //     dispatch(setItem());
+    //   }, [dispatch]);
 
     useEffect(() => {
         dispatch(setCart())
-    }, []);
+        console.log('セットカート！')
+    },[]);
 
-    useEffect(() => {
-        setArray(items);
-      }, [dispatch]);
+
+
+    // useEffect(() => {
+    //     setArray(items);
+    //   }, [dispatch]);
 
     //   useEffect(() => {
     //     setCartItem(carts);
@@ -86,9 +70,7 @@ const Cart = () => {
     //     fetchCart();
     // }, []);
 
-    useEffect(() => {
-        createTotalPrice();
-    })
+
 
     const deleteCartItem = (deleteId) => {
         console.log(deleteId)
@@ -142,7 +124,7 @@ const Cart = () => {
                         </Table>
                     </TableContainer>
             }
-            <p>{totalPrice}</p>
+            <p>{ createTotalPrice() }</p>
             {
                 carts.length === 0 ? <></> : <button onClick={() => setFlag(true)}>お届け先情報入力</button>
             }

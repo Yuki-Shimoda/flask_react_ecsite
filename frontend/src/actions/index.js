@@ -16,6 +16,7 @@ export const setItem = () => dispatch => {
 //カート情報
 export const SETCART = 'setCart'
 export const setCart = () => dispatch => {
+  console.log('actionsのsetCart発動')
   Axios.get('http://127.0.0.1:5000/cart/').then(function(res) {
     console.log(res.data)
     const cartItems = res.data

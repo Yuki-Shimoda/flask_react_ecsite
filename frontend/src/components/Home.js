@@ -60,9 +60,9 @@ const Home = () => {
     dispatch(setItem());
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(setCart());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(setCart());
+  // }, [dispatch]);
 
   useEffect(() => {
     setArray(items);
