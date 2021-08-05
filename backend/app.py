@@ -9,11 +9,10 @@ from flask_cors import CORS
 from sqlalchemy.orm import relationship
 import datetime
 
-
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 CORS(app, support_credentials=True)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:mwmw1225zwzw@localhost:5432/fr_ec'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:****@localhost:5432/****'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
@@ -24,6 +23,33 @@ class Item(db.Model):
     name = db.Column(db.String, nullable=False)
     price = db.Column(db.Integer, nullable=False)
     image = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
+
+
+Item1 = Item(name='タカアシガニ', price=12000, image='1.png', description='ズワイガニやタラバガニとは比較にならないようなボリュームと弾力性があり、脚一本食べた時の満足さは、このタカアシガニでしか味わえないものがある。味は伊勢海老に近いといわれています。')
+Item2 = Item(name='ズワイガニ', price=15000, image='2.png', description='ズワイガニは繊細な肉質で甘みや旨味が強いことが特徴です。 味がしっかりとしてやわらかな食感が楽しめるため、お刺身やカニしゃぶにして食べてみてはいかがでしょうか。 たらば蟹の魅力はぷりぷりの食感と大きな身の食べ応え。 ズワイガニと比べると少し淡泊な味わいですが、焼き物やボイルで豪快に食べるのがおすすめ。')
+Item3 = Item(name='タラバガニ', price=13000, image='3.png', description='タラバガニは身が太くて食べごたえがあります。生で食べるとエビの触感に似ており、プリプリしています。ただし、味は淡泊でエビほどの甘さはありません。ボイルにするとフワフワの触感になります。鍋にしても美味しいですが、味があっさりしているので、柚子やポン酢などを加えて食べるのもありでしょう。')
+Item4 = Item(name='毛ガニ', price=8000, image='4.png', description='毛蟹はタラバガニほどの量はありませんが、身が柔らかく繊細な味をしています。 特に毛蟹のカニ味噌は、濃厚でコクのある味をしており、苦味よりも甘みがあります。 ものによってはまったく苦味、渋みがありませんので、「カニ味噌が苦手」という方でも楽しむことができます。')
+Item5 = Item(name='クンパッポンカリー', price=1000, image='5.png', description='主にタイで食べられている蟹を使ったシーフードカレー料理。プーがタイ語で蟹を意味する。')
+Item6 = Item(name='かに玉', price=700, image='6.png', description='溶き卵にかに肉を合わせて焼いたもの。')
+Item7 = Item(name='カニ味噌', price=1000, image='7.png', description='カニの味噌')
+Item8 = Item(name='カニかま', price=1000, image='8.png', description='カニではなく魚のすり身。カニの偽物。')
+Item9 = Item(name='カニグラタン', price=880, image='9.png', description='カニの甲羅を器として利用したグラタン。カニ身入り。')
+Item10 = Item(name='カニクリームコロッケ', price=600, image='10.png', description='クリーム部分にカニ身が少し入ったコロッケ。')
+Item11 = Item(name='カニ缶', price=600, image='11.png', description='カニの身を水煮にした缶詰。')
+
+# db.session.add(Item1)
+# db.session.add(Item2)
+# db.session.add(Item3)
+# db.session.add(Item4)
+# db.session.add(Item5)
+# db.session.add(Item6)
+# db.session.add(Item7)
+# db.session.add(Item8)
+# db.session.add(Item9)
+# db.session.add(Item10)
+# db.session.add(Item11)
+# db.session.commit()
 
 class Order(db.Model):
     __tablename__ ='orders'
@@ -64,7 +90,6 @@ db.create_all()
 
 user_id = ''
 
-
 @app.route('/', methods=['GET'])
 def home():
     if request.method=='GET':
@@ -73,17 +98,22 @@ def home():
         name_list=[]
         price_list=[]
         image_list=[]
+        description_list=[]
         Items = Item.query.all()
         for item in Items:
             id = item.id
             name = item.name
             price = item.price
             image = item.image
+            description = item.description
+
 
             id_list.append(id)
             name_list.append(name)
             price_list.append(price)
             image_list.append(image)
+            description_list.append(description)
+
 
             id_id = 0
             for id in id_list:
@@ -92,6 +122,7 @@ def home():
                 dic_item[id]['name']=name_list[id_id]
                 dic_item[id]['price']=price_list[id_id]
                 dic_item[id]['image']=image_list[id_id]
+                dic_item[id]['description']=description_list[id_id]
                 id_id+=1
     return jsonify(dic_item)
 
@@ -146,7 +177,6 @@ def detail(Id):
         print('DBにOrder追加完了')
         return redirect('/')
 
-
 def toDict(self):
     return{
             'id': self[0],
@@ -173,7 +203,6 @@ def ordered():
             his_dict = toDict(his_item)
             order_his_li.append(his_dict)
         return jsonify(order_his_li)
-
 
     if request.method == 'POST':
         data = request.get_json()

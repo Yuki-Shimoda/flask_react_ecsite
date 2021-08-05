@@ -81,22 +81,20 @@ const Header =(props) => {
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
-          </IconButton>
+          </IconButton> */}
           <Typography variant="h6" className={classes.title}>
-            KANI TOWN
+            <p onClick={()=> handleLink('/')}>
+              KANI TOWN
+            </p>
           </Typography>
           <React.Fragment>
             <Router>
-              <Button onClick={() => handleLink('/')}>Home</Button>
+              <Button color="inherit" onClick={() => handleLink('/')}>Home</Button>
             </Router>
           </React.Fragment>
-          {/* <p>{userName}</p> */}
           <LoginOrLogout userInfo={props.login_user}/>
-          {/* <Button onClick={()=>handleLink('/login')}>Login</Button>
-          <Button onClick={logout}>Logout</Button>
-          <Button onClick={()=>handleLink('/signup')}>新規登録</Button> */}
         </Toolbar>
       </AppBar>
     </div>

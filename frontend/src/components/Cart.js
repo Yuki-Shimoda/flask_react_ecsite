@@ -32,8 +32,8 @@ const Cart = () => {
     
     const createTotalPrice = () => {
         let total = 0;
-        carts.forEach(item => {
-            total = total + item.quantity * item.item.price
+        carts.forEach(cart_item => {
+            total = total + cart_item.quantity * cart_item.item.price
         })
         return total; 
     }
@@ -67,21 +67,21 @@ const Cart = () => {
                             </TableHead>
                             <TableBody>
                                 {
-                                    carts.map(item => {
+                                    carts.map(cart_item => {
                                         return (
-                                            <TableRow key={item.id}>
+                                            <TableRow key={cart_item.id}>
                                                 <TableCell component="th" scope="row">
-                                                    <img src={`${process.env.PUBLIC_URL}/static/images/${item.item.image}`}　 alt="画像" width="5%"></img>
+                                                    <img src={`${process.env.PUBLIC_URL}/static/images/${cart_item.item.image}`}　 alt="画像" width="5%"></img>
                                                 </TableCell>
-                                                <TableCell align="right">{item.item.name}</TableCell>
-                                                <TableCell align="right">{item.quantity}</TableCell>
-                                                <TableCell align="right">{item.item.price}</TableCell>
+                                                <TableCell align="right">{cart_item.item.name}</TableCell>
+                                                <TableCell align="right">{cart_item.quantity}</TableCell>
+                                                <TableCell align="right">{cart_item.item.price}</TableCell>
                                                 <TableCell>
                                                     {
                                                         <Button
                                                             variant="contained"
                                                             color="primary"
-                                                            onClick={() => deleteCartItem(item.id)}
+                                                            onClick={() => deleteCartItem(cart_item.id)}
                                                         >
                                                             カートから削除
                                                             </Button>
