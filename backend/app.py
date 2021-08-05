@@ -3,12 +3,12 @@ from flask.helpers import url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import *
 from sqlalchemy.orm import *
 from flask_cors import CORS
-# import psycopg2
 from sqlalchemy.orm import relationship
+import datetime
+
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
@@ -18,14 +18,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JSON_AS_ASCII'] = False
 
 db = SQLAlchemy(app)
-
-# def get_connection():
-#     localhost = 'localhost'
-#     port = '5432'
-#     users = 'postgres'
-#     dbnames = '****'
-#     passwords = '****'
-#     return psycopg2.connect("host=" + localhost + " port=" + port + " user=" + users + " dbname=" + dbnames + " password=" + passwords)
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -153,42 +145,6 @@ def detail(Id):
 
         print('DBにOrder追加完了')
         return redirect('/')
-      
-        # Orderテーブルでuser_idでソートし、orderedが0のものがないか検索する処理
-        # カートに0件のときの処理（ Orderにorderedが0のものがないとき）
-            # Order()でレコードを生成
-        # カートに1件以上あるときの処理（Orderにorderedが0のものがあるとき）
-            # Order()でレコードは生成しない。
-        
-        # 注文確定ボタンの処理
-        # Cartテーブルからidを取得する（複数件になる可能性あり）→変数に入れる（リスト）
-        # Orderテーブルからorderedが0のidを取得する（1件）
-        # リストに入っている分のidをforで回してCart_idとし、order_idはOrderのidとしてINSERT（add）を実行
-
-
-        # # すでに同じ商品がカートに入っていた場合、レコード追加ではなく個数のみ更新する処理
-        # # user_id = user_idかつstatus = 0のitemを取ってくる
-        # carts = db.session.query(Cart.item_id).filter(Cart.status == 0, Cart.user_id == user_id).all()
-        # print(carts)
-        # item_id_list = []
-        # for i_d in carts:
-        #     item_id_list.append(i_d[0])
-        # print(item_id_list)
-
-        # # new_orderItem = Cart(status=0, quantity=quantity, item_id=item_id, user_id=user_id)
-        # if len(carts) == 0:
-        #     db.session.add(new_orderItem)
-        #     db.session.commit()
-        #     return redirect('/')
-        # else:
-        #     if item_id in item_id_list:
-        #         db.session.query(Cart).filter(Cart.item_id == new_orderItem.item_id).update({'quantity': Cart.quantity + int(quantity)})
-        #         db.session.commit()
-        #         return redirect('/')
-        #     else:
-        #         db.session.add(new_orderItem)
-        #         db.session.commit()
-        #         return redirect('/')
 
 
 def toDict(self):
@@ -218,21 +174,6 @@ def ordered():
             order_his_li.append(his_dict)
         return jsonify(order_his_li)
 
-        # with get_connection() as conn:
-        #     with conn.cursor() as cur:
-        #         sql = 'SELECT cart.id, cart.quantity, item.id, item.name, item.price, item.image FROM cart JOIN item ON cart.item_id = item.id WHERE cart.status = 0 ORDER BY cart.id ASC'
-        #         cur.execute(sql)
-        #         result_list = cur.fetchall()
-        #         print(result_list)
-        #         # [(13, 10, 1, 'タカアシガニ', 10000, '1.png'), (14, 4, 2, 'ズワイガニ', 6000, '2.png')]
-        #         l = []
-        #         for item in result_list:
-        #             c = toDict(item)
-        #             l.append(c)
-        #     print('グローバルのuser_id：'+ user_id)
-        #     print(l) 
-        #     # [{'id': 13, 'quantity': 10, 'item': {'item_id': 1, 'name': 'タカアシガニ', 'price': 10000, 'image': '1.png'}}, {'id': 14, 'quantity': 4, 'item': {'item_id': 2, 'name': 'ズワイガニ', 'price': 6000, 'image': '2.png'}}]
-        # return jsonify(l)
 
     if request.method == 'POST':
         data = request.get_json()
@@ -261,6 +202,7 @@ def ordered():
         order_record.destination_zipcode = destinationZipcode
         order_record.destination_address = destinationAddress
         order_record.destination_tel = destinationTel
+        order_record.ordered_date = datetime.date.today() 
         order_record.status = 1
         db.session.commit()
         print('order情報追加・Orderのstatus変更完了')
@@ -288,28 +230,26 @@ def history_test():
     if request.method=='GET':
         print('histo')
         print(str(user_id))
+
         resdata={}
         item_id_list=[]
         quantity_list=[]
         order_id_list=[]
         destination_name_list=[]
         status_list=[]
-        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status)\
+        ordered_date_list=[]
+        order_lists= db.session.query(Cart.item_id,Cart.quantity,Order.id,Order.destination_name, Order.status, Order.ordered_date)\
             .filter(Cart.user_id == user_id)\
             .join((OrderItems,OrderItems.cart_id==Cart.id),(Order,Order.id==OrderItems.order_id))\
             .all()  
-        print(order_lists)
+        # print(order_lists)
         for order_list in order_lists:
             item_id_list.append(order_list[0])
             quantity_list.append(order_list[1])
             order_id_list.append(order_list[2])
             destination_name_list.append(order_list[3])
             status_list.append(order_list[4])
-        # print(item_id_list)
-        # print(quantity_list)
-        # print('↓order_id_list')
-        # print(order_id_list)
-        # print(destination_name_list)
+            ordered_date_list.append(order_list[5])
 
         id_id=0
         for order_id in order_id_list:
@@ -320,12 +260,13 @@ def history_test():
                 resdata[order_id]['status']= status_list[id_id]
                 resdata[order_id]['item_list']= []
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
+                resdata[order_id]['ordered_date'] = ordered_date_list[id_id]
                 id_id+=1
             else:
                 #既にresdata[order_id]が存在している場合（1注文で複数種類の商品を購入した場合）
                 resdata[order_id]['item_list'].append({'item_id':item_id_list[id_id],'quantity':quantity_list[id_id]})
                 id_id+=1
-        # print(resdata)
+        print(resdata)
         print('orderHistory')
         redirect('/')
         return jsonify(resdata)

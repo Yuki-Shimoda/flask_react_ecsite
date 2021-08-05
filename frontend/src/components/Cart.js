@@ -12,11 +12,11 @@ import Paper from '@material-ui/core/Paper';
 import { Button } from '@material-ui/core';
 import { setCart, deleteCart, setItem } from '../actions';
 
-
 const Cart = () => {
     const dispatch = useDispatch();
     const selector = useSelector(state => state);
     console.log(selector)
+
     const carts = selector.setCart.cart // APIで取得したカート情報
 
     // const items = selector.item.items
@@ -27,7 +27,7 @@ const Cart = () => {
     // const [array, setArray] = useState(items);
 
     const [flag, setFlag] = useState(false);
-    const [totalPrice, setTotalPrice] = useState(0);
+    // const [totalPrice, setTotalPrice] = useState(0);
 
     
     const createTotalPrice = () => {
@@ -37,40 +37,11 @@ const Cart = () => {
         })
         return total; 
     }
-    // useEffect(() => {
-    //     dispatch(setItem());
-    //   }, [dispatch]);
 
     useEffect(() => {
         dispatch(setCart())
         console.log('セットカート！')
     },[]);
-
-
-
-    // useEffect(() => {
-    //     setArray(items);
-    //   }, [dispatch]);
-
-    //   useEffect(() => {
-    //     setCartItem(carts);
-    //   }, []);
-
-    // useEffect(() => {
-    //     dispatch(setCart())
-    //     setCartItem(carts)
-    //     // console.log(carts)
-    //     // console.log(cartItem)
-    // },[])
-    // useEffect(() => {
-    //     const fetchCart = async () => {
-    //         const result = await axios(`http://127.0.0.1:5000/cart`);
-    //         setCart(result.data);
-    //     };
-    //     fetchCart();
-    // }, []);
-
-
 
     const deleteCartItem = (deleteId) => {
         console.log(deleteId)

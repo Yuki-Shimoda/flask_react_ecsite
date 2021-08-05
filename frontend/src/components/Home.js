@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 // import Axios from 'axios'; actionsで実行
 import { useSelector, useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { setItem, setCart} from "../actions/index";
+import { setItem} from "../actions/index";
 import { Button } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -59,10 +59,6 @@ const Home = () => {
   useEffect(() => {
     dispatch(setItem());
   }, [dispatch]);
-
-  // useEffect(() => {
-  //   dispatch(setCart());
-  // }, [dispatch]);
 
   useEffect(() => {
     setArray(items);

@@ -31,7 +31,6 @@ const App=()=> {
      const fetchUser = () =>  {
       if(current_uid){
         dispatch(login(current_uid,current_password))
-        // dispatch(setCart())
         console.log(userIdState)
         console.log(`ログイン中のユーザーは${current_uid}`)
       }else{
